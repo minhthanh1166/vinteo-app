@@ -1,0 +1,260 @@
+{% extends 'admin/index.html' %}
+{% load i18n static %}
+
+{% block nav-breadcrumbs %}{% endblock %}
+{% block content_title %}{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    /* ── Zero out ALL padding/margin causing top gap ─────────── */
+    body.dashboard:not(.login) #main,
+    body.dashboard:not(.login) .main {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    body.dashboard:not(.login) main#content-start,
+    body.dashboard:not(.login) .content {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    body.dashboard:not(.login) #content {
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        max-width: none !important;
+        float: none !important;
+    }
+    body.dashboard:not(.login) #content-main,
+    body.dashboard:not(.login) #content-related {
+        float: none !important;
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* ── Dashboard wrapper ───────────────────────────────────── */
+    .db-wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        width: 100%;
+        padding-top: 0;
+    }
+
+    /* ── Hero: full bleed, no gap from header ────────────────── */
+    .db-hero {
+        background: linear-gradient(120deg, #1a6db5 0%, #1560a8 55%, #104d8c 100%);
+        padding: 36px 48px;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 40px;
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .db-hero::after {
+        content: '';
+        position: absolute;
+        top: -100px; right: -80px;
+        width: 360px; height: 360px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.05);
+        pointer-events: none;
+    }
+    .db-hero::before {
+        content: '';
+        position: absolute;
+        bottom: -60px; right: 200px;
+        width: 200px; height: 200px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.04);
+        pointer-events: none;
+    }
+
+    .db-hero-left {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        z-index: 1;
+        flex: 1;
+    }
+    .db-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.3);
+        border-radius: 999px;
+        padding: 5px 14px 5px 7px;
+        font-size: 12px;
+        font-weight: 700;
+        width: fit-content;
+    }
+    .db-badge img {
+        height: 22px; width: auto;
+        display: block; border-radius: 6px;
+    }
+    .db-hero h1 {
+        font-size: 30px;
+        font-weight: 800;
+        margin: 0;
+        line-height: 1.2;
+        color: #fff;
+    }
+    .db-hero p {
+        font-size: 14px;
+        line-height: 1.7;
+        color: rgba(255,255,255,0.82);
+        margin: 0;
+        max-width: 460px;
+    }
+    .db-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .db-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 14px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.3);
+        color: #fff;
+        font-size: 11px;
+        font-weight: 700;
+    }
+    .db-chip::before { content: '●'; font-size: 6px; opacity: 0.6; }
+
+    .db-hero-right {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        flex-shrink: 0;
+        z-index: 1;
+        width: 300px;
+    }
+    .db-stat {
+        background: rgba(255,255,255,0.13);
+        border: 1px solid rgba(255,255,255,0.22);
+        border-radius: 14px;
+        padding: 16px;
+    }
+    .db-stat-label {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: rgba(255,255,255,0.6);
+    }
+    .db-stat-value {
+        margin-top: 5px;
+        font-size: 14px;
+        font-weight: 800;
+        color: #fff;
+        line-height: 1.3;
+    }
+
+    /* ── Content area below hero ─────────────────────────────── */
+    .db-body {
+        padding: 28px 48px 48px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Override app_list module styles inside db-body */
+    .db-body .module {
+        border-radius: 16px !important;
+        overflow: hidden !important;
+        border: 1px solid #dce6ef !important;
+        box-shadow: 0 2px 16px rgba(15,40,70,0.08) !important;
+        background: #fff !important;
+    }
+    .db-body .module caption,
+    .db-body .module h2 {
+        background: #f5f9fd !important;
+        color: #1a3348 !important;
+        border-bottom: 1px solid #dce6ef !important;
+        padding: 14px 20px !important;
+        font-size: 13px !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.04em !important;
+        text-transform: uppercase !important;
+    }
+    .db-body .module table td,
+    .db-body .module table th {
+        padding: 11px 20px !important;
+        border-color: #e8f0f7 !important;
+    }
+    .db-body #content-related .module {
+        border-radius: 16px !important;
+    }
+    .db-body #content-related .module h2 {
+        font-size: 13px !important;
+    }
+
+    @media (max-width: 860px) {
+        .db-hero { flex-direction: column; align-items: flex-start; padding: 28px 24px; }
+        .db-hero-right { grid-template-columns: repeat(4, 1fr); width: 100%; }
+        .db-body { padding: 20px 16px 40px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<style>
+    #content { padding: 0 !important; margin: 0 !important; width: 100% !important; max-width: none !important; }
+    main.content, #content-start { padding: 0 !important; margin: 0 !important; }
+    #main, .main { padding-top: 0 !important; }
+</style>
+<div class="db-wrap">
+    <div class="db-hero">
+        <div class="db-hero-left">
+            <h1>Trang quản trị nội bộ</h1>
+            <p>Quản lý tài khoản, phân quyền và dữ liệu hệ thống trong một giao diện tập trung, trực quan, đồng bộ thương hiệu.</p>
+            <div class="db-chips">
+                <span class="db-chip">Hệ thống sẵn sàng</span>
+                <span class="db-chip">Quản trị tập trung</span>
+                <span class="db-chip">Giao diện đồng bộ</span>
+            </div>
+        </div>
+    </div>
+    <div class="db-body">
+        <div id="content-main" class="app-list">
+            {% include "admin/app_list.html" with app_list=app_list show_changelinks=True %}
+        </div>
+        <div id="content-related">
+            <div class="module" id="recent-actions-module">
+                <h2>{% trans 'Recent actions' %}</h2>
+                <h3>{% trans 'My actions' %}</h3>
+                {% load log %}
+                {% get_admin_log 10 as admin_log for_user user %}
+                {% if not admin_log %}
+                <p style="padding:12px 20px;color:#6b8299;">{% trans 'None available' %}</p>
+                {% else %}
+                <ul class="actionlist" style="padding:8px 20px 16px;margin:0;">
+                {% for entry in admin_log %}
+                <li class="{% if entry.is_addition %}addlink{% endif %}{% if entry.is_change %}changelink{% endif %}{% if entry.is_deletion %}deletelink{% endif %}">
+                    <span class="visually-hidden">{% if entry.is_addition %}{% trans 'Added:' %}{% elif entry.is_change %}{% trans 'Changed:' %}{% elif entry.is_deletion %}{% trans 'Deleted:' %}{% endif %}</span>
+                    {% if entry.is_deletion or not entry.get_admin_url %}{{ entry.object_repr }}{% else %}<a href="{{ entry.get_admin_url }}">{{ entry.object_repr }}</a>{% endif %}
+                    <br>
+                    {% if entry.content_type %}<span class="mini quiet">{% filter capfirst %}{{ entry.content_type.name }}{% endfilter %}</span>{% else %}<span class="mini quiet">{% trans 'Unknown content' %}</span>{% endif %}
+                </li>
+                {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block sidebar %}{% endblock %}

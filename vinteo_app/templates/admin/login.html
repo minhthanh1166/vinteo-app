@@ -1,0 +1,384 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    :root {
+        --login-bg-1: #0f2740;
+        --login-bg-2: #1d5d8f;
+        --login-surface: rgba(255, 255, 255, 0.96);
+        --login-surface-soft: rgba(244, 248, 252, 0.92);
+        --login-text: #19344b;
+        --login-muted: #698197;
+        --login-accent: #1f6da5;
+        --login-accent-dark: #165884;
+        --login-border: #cbd8e4;
+        --login-shadow: 0 30px 60px rgba(7, 22, 37, 0.28);
+    }
+
+    body.login {
+        min-height: 100vh;
+        background:
+            radial-gradient(circle at top left, rgba(123, 193, 255, 0.28), transparent 28%),
+            radial-gradient(circle at bottom right, rgba(85, 147, 204, 0.20), transparent 24%),
+            linear-gradient(135deg, var(--login-bg-1), var(--login-bg-2));
+        background-attachment: fixed;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    body.login #container {
+        min-width: 100%;
+        width: 100%;
+        padding: 0;
+        background: transparent;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+    }
+
+    body.login #main,
+    body.login main#content-start {
+        width: 100%;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0;
+        padding: 0;
+    }
+
+    body.login #header,
+    body.login .breadcrumbs,
+    body.login #nav-sidebar,
+    body.login .toggle-nav-sidebar,
+    body.login #footer {
+        display: none;
+    }
+
+    body.login #content {
+        padding: 32px;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .login-layout {
+        min-height: auto;
+        display: grid;
+        place-items: center;
+        width: 100%;
+    }
+
+    .login-card {
+        width: min(980px, 100%);
+        display: grid;
+        grid-template-columns: 1.05fr 0.95fr;
+        border-radius: 28px;
+        overflow: hidden;
+        box-shadow: var(--login-shadow);
+        background: var(--login-surface);
+    }
+
+    .login-showcase {
+        padding: 48px 42px;
+        color: #fff;
+        background:
+            linear-gradient(180deg, rgba(7, 37, 63, 0.25), rgba(7, 37, 63, 0.52)),
+            linear-gradient(145deg, #266c9f, #0f3558);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 30px;
+    }
+
+    .login-brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .login-brand img {
+        height: 48px;
+        width: auto;
+        display: block;
+        padding: 6px 10px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(6px);
+    }
+
+    .login-brand-text strong {
+        display: block;
+        font-size: 27px;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+    }
+
+    .login-brand-text span {
+        display: block;
+        margin-top: 4px;
+        color: rgba(255, 255, 255, 0.82);
+        font-size: 13px;
+    }
+
+    .login-copy h1 {
+        margin: 0 0 12px;
+        font-size: 38px;
+        line-height: 1.15;
+        color: #fff;
+    }
+
+    .login-copy p {
+        margin: 0;
+        font-size: 15px;
+        line-height: 1.7;
+        color: rgba(255, 255, 255, 0.84);
+    }
+
+    .login-feature-list {
+        display: grid;
+        gap: 12px;
+    }
+
+    .login-feature {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.10);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .login-feature-badge {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+        font-weight: 700;
+        background: rgba(255, 255, 255, 0.16);
+    }
+
+    .login-form-panel {
+        padding: 42px 38px;
+        background: linear-gradient(180deg, var(--login-surface), var(--login-surface-soft));
+        color: var(--login-text);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .login-form-panel h2 {
+        margin: 0 0 8px;
+        font-size: 28px;
+        color: var(--login-text);
+    }
+
+    .login-form-panel > p {
+        margin: 0 0 24px;
+        color: var(--login-muted);
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .login-form-wrap form {
+        margin-top: 0;
+    }
+
+    .login-form-wrap .form-row {
+        margin-bottom: 16px;
+    }
+
+    .login-form-wrap label {
+        display: block;
+        margin-bottom: 7px;
+        font-weight: 600;
+        color: var(--login-text);
+    }
+
+    .login-form-wrap input[type="text"],
+    .login-form-wrap input[type="password"],
+    .login-form-wrap input[type="email"] {
+        width: 100%;
+        height: 48px;
+        border-radius: 14px;
+        border: 1px solid var(--login-border);
+        padding: 0 16px;
+        font-size: 15px;
+        color: var(--login-text);
+        background: #fff;
+        box-sizing: border-box;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .login-form-wrap input:focus {
+        outline: none;
+        border-color: var(--login-accent);
+        box-shadow: 0 0 0 4px rgba(31, 109, 165, 0.12);
+    }
+
+    .submit-row {
+        padding: 0;
+        margin: 22px 0 0;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+    }
+
+    .submit-row input {
+        width: 100%;
+        height: 48px;
+        border: none;
+        border-radius: 14px;
+        font-size: 15px;
+        font-weight: 700;
+        color: #fff;
+        background: linear-gradient(135deg, var(--login-accent), var(--login-accent-dark));
+        box-shadow: 0 14px 26px rgba(31, 109, 165, 0.26);
+        cursor: pointer;
+    }
+
+    .submit-row input:hover {
+        filter: brightness(1.03);
+    }
+
+    .errornote,
+    ul.errorlist,
+    .login .errornote {
+        border-radius: 14px;
+        border: 1px solid #f0c2ca;
+        background: #fff1f4;
+        color: #a0384b;
+        padding: 12px 14px;
+        margin: 0 0 16px;
+        list-style: none;
+    }
+
+    .login-help {
+        margin-top: 18px;
+        padding-top: 16px;
+        border-top: 1px solid #dce5ee;
+        color: var(--login-muted);
+        font-size: 13px;
+        line-height: 1.6;
+    }
+
+    @media (max-width: 900px) {
+        body.login #content {
+            padding: 18px;
+        }
+
+        .login-card {
+            grid-template-columns: 1fr;
+        }
+
+        .login-showcase,
+        .login-form-panel {
+            padding: 28px 22px;
+        }
+
+        .login-copy h1 {
+            font-size: 30px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block bodyclass %}{{ block.super }} login{% endblock %}
+{% block nav-global %}{% endblock %}
+{% block breadcrumbs %}{% endblock %}
+{% block content_title %}{% endblock %}
+
+{% block content %}
+<div class="login-layout">
+    <div class="login-card">
+        <section class="login-showcase">
+            <div>
+                <div class="login-brand">
+                    <img src="{% static 'logo/logo.png' %}" alt="bcttll logo">
+                    <div class="login-brand-text">
+                        <strong>BCTTLL Admin</strong>
+                        <span>Hệ thống quản trị hội nghị truyền hình</span>
+                    </div>
+                </div>
+
+                <div class="login-copy">
+                    <h1>Đăng nhập an toàn vào hệ thống quản trị</h1>
+                    <p>
+                        Quản lý tài khoản, cấu hình nền tảng và theo dõi vận hành tại một nơi duy nhất.
+                        Giao diện được tối ưu cho đội ngũ quản trị nội bộ.
+                    </p>
+                </div>
+            </div>
+
+            <div class="login-feature-list">
+                <div class="login-feature">
+                    <div class="login-feature-badge">24</div>
+                    <div>Theo dõi trạng thái hệ thống và nhật ký vận hành theo thời gian thực.</div>
+                </div>
+                <div class="login-feature">
+                    <div class="login-feature-badge">AI</div>
+                    <div>Giao diện trực quan, rõ ràng và phù hợp cho môi trường quản trị doanh nghiệp.</div>
+                </div>
+                <div class="login-feature">
+                    <div class="login-feature-badge">✓</div>
+                    <div>Phân quyền người dùng, nhóm quyền và điều khiển quản trị tập trung.</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="login-form-panel">
+            <h2>Chào mừng trở lại</h2>
+            <p>Sử dụng tài khoản quản trị đã được cấp để truy cập hệ thống.</p>
+
+            <div class="login-form-wrap">
+                {% if form.errors and not form.non_field_errors %}
+                    <p class="errornote">
+                        {% blocktranslate count counter=form.errors.items|length %}Vui lòng sửa {{ counter }} lỗi bên dưới.{% plural %}Vui lòng sửa {{ counter }} lỗi bên dưới.{% endblocktranslate %}
+                    </p>
+                {% endif %}
+
+                {% if form.non_field_errors %}
+                    {% for error in form.non_field_errors %}
+                        <p class="errornote">{{ error }}</p>
+                    {% endfor %}
+                {% endif %}
+
+                <form action="{{ app_path }}" method="post" id="login-form">
+                    {% csrf_token %}
+                    <div class="form-row">
+                        {{ form.username.errors }}
+                        {{ form.username.label_tag }}
+                        {{ form.username }}
+                    </div>
+                    <div class="form-row">
+                        {{ form.password.errors }}
+                        {{ form.password.label_tag }}
+                        {{ form.password }}
+                        <input type="hidden" name="next" value="{{ next }}">
+                    </div>
+                    {% url 'admin_password_reset' as password_reset_url %}
+                    {% if password_reset_url %}
+                    <div style="text-align:right;margin-top:-6px;margin-bottom:14px;">
+                        <a href="{{ password_reset_url }}" style="color:var(--login-accent);text-decoration:none;font-size:13px;">Quên mật khẩu?</a>
+                    </div>
+                    {% endif %}
+                    <div class="submit-row">
+                        <input type="submit" value="{% translate 'Log in' %}">
+                    </div>
+                </form>
+            </div>
+
+            <div class="login-help">
+                Nếu gặp sự cố đăng nhập, vui lòng liên hệ quản trị viên hệ thống để được cấp lại quyền truy cập.
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}
