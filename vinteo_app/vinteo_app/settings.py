@@ -17,6 +17,23 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+def load_dotenv(dotenv_path):
+    if not dotenv_path.exists():
+        return
+
+    for raw_line in dotenv_path.read_text(encoding='utf-8').splitlines():
+        line = raw_line.strip()
+
+        if not line or line.startswith('#') or '=' not in line:
+            continue
+
+        key, value = line.split('=', 1)
+        os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
+
+
+load_dotenv(BASE_DIR / '.env')
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
@@ -89,6 +106,9 @@ postgres_password = os.getenv("POSTGRES_PASSWORD")
 postgres_host = os.getenv("POSTGRES_HOST")
 postgres_port = os.getenv("POSTGRES_PORT", "5432")
 
+if postgres_host == 'db' and not Path('/.dockerenv').exists():
+    postgres_host = 'localhost'
+
 if all([postgres_name, postgres_user, postgres_password, postgres_host]):
     DATABASES = {
         "default": {
@@ -139,7 +159,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'vi'
 
 TIME_ZONE = 'UTC'
 
@@ -152,3 +172,4 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']

@@ -1,0 +1,396 @@
+{% extends 'admin/base_site.html' %}
+{% load i18n static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    /* ── Variables ───────────────────────────────────────────── */
+    :root {
+        --c-bg: #f0f4f8;
+        --c-surface: #ffffff;
+        --c-border: #dce6ef;
+        --c-text: #1a3348;
+        --c-muted: #6b8299;
+        --c-primary: #1a6db5;
+        --c-primary-dk: #135293;
+        --c-primary-lt: #eaf3fb;
+        --c-shadow: 0 2px 16px rgba(15,40,70,0.08);
+        --c-radius: 16px;
+    }
+
+    /* ── Hide dark/light toggle (broken with custom theme) ───── */
+    button#button-theme,
+    #header-toggle-theme,
+    #theme-toggle,
+    .theme-toggle,
+    #header a[title*="theme"],
+    #header a[title*="Theme"],
+    #user-tools [class*="theme"],
+    [data-theme-toggle],
+    button[title*="theme"],
+    .main-header > .global-header > .theme,
+    #user-tools > :last-child:not(a) { display: none !important; }
+
+    /* ── Kill every possible top gap source ─────────────────── */
+    html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    .skip-to-content-link,
+    .skip-link,
+    a.skip-link,
+    #skip-link,
+    #skip-to-content-link,
+    a.visually-hidden,
+    a[href="#content-start"],
+    a[href="#main"],
+    a[href="#content"] {
+        display: none !important;
+        height: 0 !important;
+        width: 0 !important;
+        overflow: hidden !important;
+        position: absolute !important;
+        top: -9999px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        pointer-events: none !important;
+    }
+    body:not(.login) #container,
+    body:not(.login) #wrap,
+    body:not(.login) #main,
+    body:not(.login) #main-content,
+    body:not(.login) #header,
+    body:not(.login) #content-container {
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }
+
+    /* ── Base ────────────────────────────────────────────────── */
+    body:not(.login) {
+        background: var(--c-bg);
+        color: var(--c-text);
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        margin: 0;
+        padding: 0 0;
+    }
+    body:not(.login) #container { background: transparent; margin: 0; padding: 0; }
+    body:not(.login) #main, body:not(.login) #main-content { background: transparent; }
+
+    /* ── Header ──────────────────────────────────────────────── */
+    body:not(.login) #header {
+        background: linear-gradient(135deg, var(--c-primary) 0%, var(--c-primary-dk) 100%) !important;
+        color: #fff !important;
+        box-shadow: 0 2px 14px rgba(19,82,147,0.25);
+        margin: 0 !important;
+        padding: 16px 32px !important;
+    }
+    body:not(.login) #branding,
+    body:not(.login) #site-name,
+    body:not(.login) #user-tools,
+    body:not(.login) #user-tools * {
+        margin-top: 0 !important;
+    }
+    body:not(.login) #branding h1,
+    body:not(.login) #branding h1 a:link,
+    body:not(.login) #branding h1 a:visited {
+        color: #fff !important;
+        font-weight: 700;
+        font-size: 15px;
+    }
+    body:not(.login) #user-tools,
+    body:not(.login) #user-tools a { color: rgba(255,255,255,0.88) !important; font-size: 12px; }
+
+    /* ── Breadcrumbs ─────────────────────────────────────────── */
+    body:not(.login) div.breadcrumbs {
+        background: transparent;
+        color: var(--c-muted);
+        border: none;
+        padding: 10px 32px 0;
+        font-size: 13px;
+        display: none;
+    }
+
+    /* ── Wipe Django's own content sizing ────────────────────── */
+    body:not(.login) #content,
+    body:not(.login) #content-main,
+    body:not(.login) #content-related,
+    body:not(.login) #main {
+        width: auto !important;
+        max-width: none !important;
+        float: none !important;
+        box-sizing: border-box;
+    }
+
+    /* ── Content wrapper ─────────────────────────────────────── */
+    body:not(.login) #content { padding: 20px 32px 48px; }
+
+    /* ── Dashboard: single full-width column ─────────────────── */
+    body.dashboard:not(.login) #content {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+    body.dashboard:not(.login) #content-main,
+    body.dashboard:not(.login) #content-related {
+        margin: 0;
+    }
+    body.dashboard:not(.login) #content-related .module { width: 100%; }
+
+    /* ── Hero Banner ─────────────────────────────────────────── */
+    .dash-hero {
+        background: linear-gradient(120deg, var(--c-primary) 0%, #1860a8 55%, var(--c-primary-dk) 100%);
+        border-radius: 18px;
+        padding: 32px 40px;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 32px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 8px 28px rgba(19,82,147,0.3);
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .dash-hero::after {
+        content: '';
+        position: absolute;
+        top: -80px; right: -60px;
+        width: 300px; height: 300px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.05);
+        pointer-events: none;
+    }
+    .dash-hero::before {
+        content: '';
+        position: absolute;
+        bottom: -40px; right: 160px;
+        width: 180px; height: 180px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.04);
+        pointer-events: none;
+    }
+
+    /* Hero left */
+    .dash-hero-left {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        z-index: 1;
+        flex: 1;
+    }
+    .dash-hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.25);
+        border-radius: 999px;
+        padding: 5px 14px 5px 7px;
+        font-size: 12px;
+        font-weight: 700;
+        width: fit-content;
+    }
+    .dash-hero-badge img {
+        height: 22px; width: auto;
+        display: block; border-radius: 6px;
+    }
+    .dash-hero h1 {
+        font-size: 28px;
+        font-weight: 800;
+        margin: 0;
+        line-height: 1.2;
+        color: #fff;
+    }
+    .dash-hero p {
+        font-size: 13.5px;
+        line-height: 1.7;
+        color: rgba(255,255,255,0.82);
+        margin: 0;
+        max-width: 440px;
+    }
+    .dash-hero-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 4px;
+    }
+    .dash-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 13px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.28);
+        color: #fff;
+        font-size: 11px;
+        font-weight: 700;
+    }
+    .dash-chip::before { content: '●'; font-size: 6px; opacity: 0.6; }
+
+    /* Hero right – stat cards */
+    .dash-hero-right {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        flex-shrink: 0;
+        z-index: 1;
+        width: 280px;
+    }
+    .dash-stat {
+        background: rgba(255,255,255,0.13);
+        border: 1px solid rgba(255,255,255,0.22);
+        border-radius: 12px;
+        padding: 14px 16px;
+    }
+    .dash-stat-label {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: rgba(255,255,255,0.6);
+    }
+    .dash-stat-value {
+        margin-top: 4px;
+        font-size: 13px;
+        font-weight: 800;
+        color: #fff;
+        line-height: 1.3;
+    }
+
+    /* ── Module cards ────────────────────────────────────────── */
+    body:not(.login) .module,
+    body:not(.login) .inline-group {
+        border: 1px solid var(--c-border);
+        background: var(--c-surface);
+        box-shadow: var(--c-shadow);
+        border-radius: var(--c-radius);
+        overflow: hidden;
+    }
+    body:not(.login) .module h2,
+    body:not(.login) .module caption,
+    body:not(.login) .inline-group h2 {
+        background: #f5f9fd;
+        color: var(--c-text);
+        border-bottom: 1px solid var(--c-border);
+        padding: 13px 20px;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+    }
+    body:not(.login) .module table th,
+    body:not(.login) .module table td { padding: 10px 20px; }
+
+    /* ── Results / submit / selector ─────────────────────────── */
+    body:not(.login) .results,
+    body:not(.login) .submit-row,
+    body:not(.login) .selector {
+        border: 1px solid var(--c-border);
+        background: var(--c-surface);
+        box-shadow: var(--c-shadow);
+        border-radius: var(--c-radius);
+        overflow: hidden;
+    }
+
+    /* ── Tables ──────────────────────────────────────────────── */
+    body:not(.login) table th,
+    body:not(.login) table td { border-color: #e4edf5; }
+    body:not(.login) tbody tr:nth-child(even) td,
+    body:not(.login) tbody tr:nth-child(even) th { background: #fafcfe; }
+    body:not(.login) .dashboard .module table td a { font-weight: 600; }
+
+    /* ── Links ───────────────────────────────────────────────── */
+    body:not(.login) a:link, body:not(.login) a:visited { color: var(--c-primary); }
+
+    /* ── Buttons ─────────────────────────────────────────────── */
+    body:not(.login) .button,
+    body:not(.login) input[type=submit],
+    body:not(.login) input[type=button],
+    body:not(.login) .submit-row input,
+    body:not(.login) a.button {
+        background: linear-gradient(135deg, var(--c-primary), var(--c-primary-dk));
+        border: none;
+        border-radius: 10px;
+        color: #fff;
+        font-weight: 700;
+        box-shadow: 0 3px 10px rgba(26,109,181,0.2);
+    }
+
+    /* ── Form inputs ─────────────────────────────────────────── */
+    body:not(.login) input,
+    body:not(.login) textarea,
+    body:not(.login) select {
+        border-radius: 10px;
+        border: 1px solid var(--c-border);
+        padding: 9px 12px;
+    }
+    body:not(.login) input:focus,
+    body:not(.login) textarea:focus,
+    body:not(.login) select:focus {
+        border-color: var(--c-primary);
+        box-shadow: 0 0 0 3px rgba(26,109,181,0.1);
+        outline: none;
+    }
+
+    /* ── Sidebar nav ─────────────────────────────────────────── */
+    body:not(.login) #nav-sidebar { border-right: 1px solid var(--c-border); background: #f6f9fc; }
+
+    /* ── Messages ────────────────────────────────────────────── */
+    body:not(.login) .messagelist li { border-radius: 12px; box-shadow: var(--c-shadow); }
+
+    /* ── Responsive ──────────────────────────────────────────── */
+    @media (max-width: 860px) {
+        body:not(.login) #header,
+        body:not(.login) #content,
+        body:not(.login) div.breadcrumbs { padding-left: 16px; padding-right: 16px; }
+        .dash-hero { flex-direction: column; align-items: flex-start; padding: 24px 20px; }
+        .dash-hero-right { grid-template-columns: repeat(4, 1fr); width: 100%; }
+    }
+</style>
+{% endblock %}
+
+{% block skip-link %}{% endblock %}
+
+{% block theme-toggle %}{% endblock %}
+
+{% block dark-mode-vars %}{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Remove theme toggle button
+    var t = document.querySelector('#button-theme-toggle, #theme-toggle, [data-theme-toggle], button[title*="heme"]');
+    if (t) t.remove();
+    // Remove skip link (actual Django class is skip-to-content-link)
+    document.querySelectorAll('.skip-to-content-link, .skip-link, a[href="#content-start"], a[href="#main"], a[href="#content"]').forEach(function(el){ el.remove(); });
+    // Force content full width + zero padding
+    var c = document.getElementById('content');
+    if (c) { c.style.width = '100%'; c.style.maxWidth = 'none'; c.style.padding = '0'; c.style.margin = '0'; }
+    var cs = document.getElementById('content-start');
+    if (cs) { cs.style.padding = '0'; cs.style.margin = '0'; }
+    var cm = document.getElementById('content-main');
+    if (cm) { cm.style.width = '100%'; cm.style.float = 'none'; }
+    var cr = document.getElementById('content-related');
+    if (cr) { cr.style.width = '100%'; cr.style.float = 'none'; }
+    // Remove any element before #header that creates gap
+    var header = document.getElementById('header');
+    if (header && header.parentNode) {
+        var node = header.parentNode.firstChild;
+        while (node && node !== header) {
+            var next = node.nextSibling;
+            if (node.nodeType === 1) node.remove();
+            node = next;
+        }
+    }
+});
+</script>
+{% endblock %}
+
+{% block branding %}
+<h1 id="site-name" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+    <img src="{% static 'logo/logo.png' %}" alt="Logo" style="height:36px;width:auto;display:block;padding:4px 6px;border-radius:10px;background:rgba(255,255,255,0.15);">
+    <span>{{ site_header|default:_('Django administration') }}</span>
+</h1>
+{% endblock %}
