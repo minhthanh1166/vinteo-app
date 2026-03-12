@@ -140,11 +140,25 @@
                           <button
                             type="button"
                             class="zoom-control-btn mic"
-                            title="Toggle participant microphones"
+                            title="Mute participant microphones"
+                            aria-pressed="false"
                           >
-                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <svg
+                              class="icon-unmuted"
+                              viewBox="0 0 24 24"
+                              aria-hidden="true"
+                            >
                               <path
                                 d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zm-5 8a1 1 0 0 1 1 1 4 4 0 0 0 8 0 1 1 0 1 1 2 0 6 6 0 0 1-5 5.91V21h2a1 1 0 1 1 0 2H9a1 1 0 1 1 0-2h2v-3.09A6 6 0 0 1 6 12a1 1 0 0 1 1-1z"
+                              />
+                            </svg>
+                            <svg
+                              class="icon-muted"
+                              viewBox="0 0 24 24"
+                              aria-hidden="true"
+                            >
+                              <path
+                                d="M6.71 5.29a1 1 0 0 0-1.42 1.42l4.01 4.01V12a3 3 0 1 0 6 0V9.41l2 2V12a6 6 0 0 1-5 5.91V21h2a1 1 0 1 1 0 2H9a1 1 0 1 1 0-2h2v-3.09A6 6 0 0 1 6 12a1 1 0 0 1 2 0 4 4 0 0 0 1.84 3.37L6.71 5.29zM12 3a3 3 0 0 0-3 3v1.59l6 6V6a3 3 0 0 0-3-3zm8.71 16.29a1 1 0 0 1-1.42 1.42l-14-14a1 1 0 1 1 1.42-1.42l14 14z"
                               />
                             </svg>
                           </button>
@@ -361,6 +375,19 @@
     </div>
     <script>
       (function () {
+        function initMicToggle() {
+          const micButton = document.querySelector(".zoom-control-btn.mic");
+          if (!micButton) return;
+
+          micButton.addEventListener("click", function () {
+            const isMuted = micButton.classList.toggle("is-muted");
+            micButton.setAttribute("aria-pressed", String(isMuted));
+            micButton.title = isMuted
+              ? "Unmute participant microphones"
+              : "Mute participant microphones";
+          });
+        }
+
         function syncParticipantListHeight() {
           const stage = document.querySelector(".split-main .zoom-stage");
           const participantBoxes = Array.from(
@@ -460,6 +487,7 @@
         }
 
         window.addEventListener("load", function () {
+          initMicToggle();
           syncDashboardLayoutHeights();
           window.requestAnimationFrame(syncDashboardLayoutHeights);
         });

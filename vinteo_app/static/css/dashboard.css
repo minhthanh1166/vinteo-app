@@ -631,8 +631,26 @@ body {
   fill: currentColor;
 }
 
+.zoom-control-btn .icon-muted {
+  display: none;
+}
+
 .zoom-control-btn.mic {
   color: #a8d0ff;
+}
+
+.zoom-control-btn.mic.is-muted {
+  color: #ffd8d8;
+  background: linear-gradient(180deg, #784651, #5b2f38);
+  border-color: #925866;
+}
+
+.zoom-control-btn.mic.is-muted .icon-unmuted {
+  display: none;
+}
+
+.zoom-control-btn.mic.is-muted .icon-muted {
+  display: block;
 }
 
 .zoom-control-btn.leave {
