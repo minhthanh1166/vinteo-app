@@ -7,7 +7,7 @@
     <title>Vinteo RMX Manager</title>
     <link
       rel="stylesheet"
-      href="{% static 'css/dashboard.css' %}?v=20260312-1"
+      href="{% static 'css/dashboard.css' %}?v=20260316-20"
     />
   </head>
   <body>
@@ -25,7 +25,7 @@
           </div>
           <div class="header-meta">
             <div>Operator: admin</div>
-            <div>System Time: 10-Mar-2026 09:42</div>
+            <div>System Time: <span id="system-time-value">10-Mar-2026 09:42</span></div>
             <div>Domain: Vinteo Core Cluster</div>
           </div>
         </div>
@@ -131,47 +131,12 @@
                     <div class="zoom-stage-body">
                       <div class="zoom-grid single">
                         <div class="zoom-tile main">
-                          <span class="zoom-label">Main Stage - Site 101</span>
+                          <span class="zoom-label is-mini">Site 101</span>
                         </div>
                         <div
                           class="zoom-controls"
                           aria-label="Meeting controls"
                         >
-                          <button
-                            type="button"
-                            class="zoom-control-btn mic"
-                            title="Mute participant microphones"
-                            aria-pressed="false"
-                          >
-                            <svg
-                              class="icon-unmuted"
-                              viewBox="0 0 24 24"
-                              aria-hidden="true"
-                            >
-                              <path
-                                d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zm-5 8a1 1 0 0 1 1 1 4 4 0 0 0 8 0 1 1 0 1 1 2 0 6 6 0 0 1-5 5.91V21h2a1 1 0 1 1 0 2H9a1 1 0 1 1 0-2h2v-3.09A6 6 0 0 1 6 12a1 1 0 0 1 1-1z"
-                              />
-                            </svg>
-                            <svg
-                              class="icon-muted"
-                              viewBox="0 0 24 24"
-                              aria-hidden="true"
-                            >
-                              <path
-                                d="M6.71 5.29a1 1 0 0 0-1.42 1.42l4.01 4.01V12a3 3 0 1 0 6 0V9.41l2 2V12a6 6 0 0 1-5 5.91V21h2a1 1 0 1 1 0 2H9a1 1 0 1 1 0-2h2v-3.09A6 6 0 0 1 6 12a1 1 0 0 1 2 0 4 4 0 0 0 1.84 3.37L6.71 5.29zM12 3a3 3 0 0 0-3 3v1.59l6 6V6a3 3 0 0 0-3-3zm8.71 16.29a1 1 0 0 1-1.42 1.42l-14-14a1 1 0 1 1 1.42-1.42l14 14z"
-                              />
-                            </svg>
-                          </button>
-
-                          <button
-                            type="button"
-                            class="zoom-control-btn record"
-                            title="Start/stop recording"
-                          >
-                            <svg viewBox="0 0 24 24" aria-hidden="true">
-                              <circle cx="12" cy="12" r="6" />
-                            </svg>
-                          </button>
                           <button
                             type="button"
                             class="zoom-control-btn leave"
@@ -191,66 +156,210 @@
 
                 <div class="info-grid">
                   <section class="box">
-                    <div class="box-head">Address Book</div>
+                    <div class="box-head address-book-head">
+                      <span>Address Book</span>
+                      <div
+                        class="address-book-actions"
+                        aria-label="Address book actions"
+                      >
+                        <button
+                          type="button"
+                          class="address-icon-btn"
+                          data-address-action="add-participant"
+                          title="Add participant"
+                          aria-label="Add participant"
+                        >
+                          <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path
+                              d="M9 11a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm0 2c-3.33 0-6 1.79-6 4v2h9.5v-1.25A4.75 4.75 0 0 1 16.25 13zm10.75 2.75H18V14a1 1 0 0 0-2 0v1.75h-1.75a1 1 0 0 0 0 2H16v1.75a1 1 0 0 0 2 0v-1.75h1.75a1 1 0 0 0 0-2z"
+                            />
+                          </svg>
+                        </button>
+                        <button
+                          type="button"
+                          class="address-icon-btn is-danger"
+                          title="Delete participant"
+                          aria-label="Delete participant"
+                        >
+                          <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path
+                              d="M9 11a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm0 2c-3.33 0-6 1.79-6 4v2h11v-2c0-2.21-2.67-4-6-4zm6.5 2.5h5a1 1 0 1 1 0 2h-5a1 1 0 1 1 0-2z"
+                            />
+                          </svg>
+                        </button>
+                        <button
+                          type="button"
+                          class="address-icon-btn"
+                          data-address-action="add-group"
+                          title="Add group"
+                          aria-label="Add group"
+                        >
+                          <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path
+                              d="M6 7a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm12 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM6 9c-2.67 0-5 1.34-5 3v2h10v-2c0-1.66-2.33-3-5-3zm12 0c-2.67 0-5 1.34-5 3v2h4v2h2v-2h2v-2h-2V10h-2v2h-4c0-1.66 2.33-3 5-3 1.16 0 2.24.26 3.07.71A4.83 4.83 0 0 0 18 9z"
+                            />
+                          </svg>
+                        </button>
+                        <button
+                          type="button"
+                          class="address-icon-btn is-danger"
+                          title="Delete group"
+                          aria-label="Delete group"
+                        >
+                          <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path
+                              d="M6 7a3 3 0 1 0-3-3 3 3 0 0 0 3 3zm12 0a3 3 0 1 0-3-3 3 3 0 0 0 3 3zM6 9c-2.67 0-5 1.34-5 3v2h10v-2c0-1.66-2.33-3-5-3zm12 0c-2.67 0-5 1.34-5 3v2h10v-2c0-1.66-2.33-3-5-3zm-3.5 6.5h7a1 1 0 1 1 0 2h-7a1 1 0 1 1 0-2z"
+                            />
+                          </svg>
+                        </button>
+                        <button
+                          type="button"
+                          class="address-icon-btn"
+                          title="Import address book"
+                          aria-label="Import address book"
+                        >
+                          <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path
+                              d="M11 3a1 1 0 0 1 2 0v8.59l2.3-2.3a1 1 0 1 1 1.4 1.42l-4 3.99a1 1 0 0 1-1.4 0l-4-3.99a1 1 0 1 1 1.4-1.42l2.3 2.3zM4 16a2 2 0 0 1 2-2h2.5a1 1 0 0 1 0 2H6v4h12v-4h-2.5a1 1 0 1 1 0-2H18a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"
+                            />
+                          </svg>
+                        </button>
+                        <button
+                          type="button"
+                          class="address-icon-btn is-danger"
+                          title="Export address book"
+                          aria-label="Export address book"
+                        >
+                          <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path
+                              d="M4 16a2 2 0 0 1 2-2h2.5a1 1 0 0 1 0 2H6v4h12v-4h-2.5a1 1 0 1 1 0-2H18a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm8-13a1 1 0 0 1 1 1v8.59l2.3-2.3a1 1 0 0 1 1.4 1.42l-4 3.99a1 1 0 0 1-1.4 0l-4-3.99a1 1 0 1 1 1.4-1.42l2.3 2.3V4a1 1 0 0 1 1-1z"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
                     <div
                       class="box-body scroll-list sync-panel-body participant-list-body participant-list-top"
                     >
-                      <table class="participant-table">
-                        <tbody>
-                          <tr>
-                            <td>Nguyen Minh Anh</td>
-                            <td>Host</td>
-                          </tr>
-                          <tr>
-                            <td>Tran Gia Bao</td>
-                            <td>Presenter</td>
-                          </tr>
-                          <tr>
-                            <td>Le Thu Ha</td>
-                            <td>Moderator</td>
-                          </tr>
-                          <tr>
-                            <td>Pham Quoc Dat</td>
-                            <td>Guest</td>
-                          </tr>
-                          <tr>
-                            <td>Hoang Kim Ngan</td>
-                            <td>Guest</td>
-                          </tr>
-                          <tr>
-                            <td>Vo Duc Nam</td>
-                            <td>Guest</td>
-                          </tr>
-                          <tr>
-                            <td>Vo Duc Nam</td>
-                            <td>Guest</td>
-                          </tr>
-                          <tr>
-                            <td>Vo Duc Nam</td>
-                            <td>Guest</td>
-                          </tr>
-                          <tr>
-                            <td>Vo Duc Nam</td>
-                            <td>Guest</td>
-                          </tr>
-                          <tr>
-                            <td>Vo Duc Nam</td>
-                            <td>Guest</td>
-                          </tr>
-                          <tr>
-                            <td>Vo Duc Nam</td>
-                            <td>Guest</td>
-                          </tr>
-                          <tr>
-                            <td>Vo Duc Nam</td>
-                            <td>Guest</td>
-                          </tr>
-                          <tr>
-                            <td>Vo Duc Nam</td>
-                            <td>Guest</td>
-                          </tr>
-                        </tbody>
-                      </table>
+                      <div class="address-tree" role="tree">
+                        <details class="address-group" open>
+                          <summary class="address-node group">
+                            <span class="address-caret" aria-hidden="true"></span>
+                            <span class="address-folder" aria-hidden="true"></span>
+                            <span class="address-label">Vinteo Core Cluster</span>
+                          </summary>
+                          <div class="address-children">
+                            <details class="address-group" open>
+                              <summary class="address-node group">
+                                <span class="address-caret" aria-hidden="true"></span>
+                                <span class="address-folder" aria-hidden="true"></span>
+                                <span class="address-label">Management</span>
+                              </summary>
+                              <ul class="address-list">
+                                <li class="address-node participant">
+                                  <span
+                                    class="address-file"
+                                    aria-hidden="true"
+                                  ></span>
+                                  <span class="address-label"
+                                    >Nguyen Minh Anh</span
+                                  >
+                                </li>
+                                <li class="address-node participant">
+                                  <span
+                                    class="address-file"
+                                    aria-hidden="true"
+                                  ></span>
+                                  <span class="address-label"
+                                    >Tran Gia Bao</span
+                                  >
+                                </li>
+                                <li class="address-node participant">
+                                  <span
+                                    class="address-file"
+                                    aria-hidden="true"
+                                  ></span>
+                                  <span class="address-label"
+                                    >Le Thu Ha</span
+                                  >
+                                </li>
+                              </ul>
+                            </details>
+
+                            <details class="address-group" open>
+                              <summary class="address-node group">
+                                <span class="address-caret" aria-hidden="true"></span>
+                                <span class="address-folder" aria-hidden="true"></span>
+                                <span class="address-label">Operations</span>
+                              </summary>
+                              <ul class="address-list">
+                                <li class="address-node participant">
+                                  <span
+                                    class="address-file"
+                                    aria-hidden="true"
+                                  ></span>
+                                  <span class="address-label"
+                                    >Pham Quoc Dat</span
+                                  >
+                                </li>
+                                <li class="address-node participant">
+                                  <span
+                                    class="address-file"
+                                    aria-hidden="true"
+                                  ></span>
+                                  <span class="address-label"
+                                    >Vo Duc Nam</span
+                                  >
+                                </li>
+                              </ul>
+                            </details>
+                          </div>
+                        </details>
+
+                        <details class="address-group" open>
+                          <summary class="address-node group">
+                            <span class="address-caret" aria-hidden="true"></span>
+                            <span class="address-folder" aria-hidden="true"></span>
+                            <span class="address-label">APAC Sales</span>
+                          </summary>
+                          <ul class="address-list">
+                            <li class="address-node participant">
+                              <span class="address-file" aria-hidden="true"></span>
+                              <span class="address-label"
+                                >Hoang Kim Ngan</span
+                              >
+                            </li>
+                            <li class="address-node participant">
+                              <span class="address-file" aria-hidden="true"></span>
+                              <span class="address-label"
+                                >Bui Anh Tuan</span
+                              >
+                            </li>
+                          </ul>
+                        </details>
+
+                        <details class="address-group">
+                          <summary class="address-node group">
+                            <span class="address-caret" aria-hidden="true"></span>
+                            <span class="address-folder" aria-hidden="true"></span>
+                            <span class="address-label">External Partners</span>
+                          </summary>
+                          <ul class="address-list">
+                            <li class="address-node participant">
+                              <span class="address-file" aria-hidden="true"></span>
+                              <span class="address-label"
+                                >Partner Site 01</span
+                              >
+                            </li>
+                            <li class="address-node participant">
+                              <span class="address-file" aria-hidden="true"></span>
+                              <span class="address-label"
+                                >Partner Site 02</span
+                              >
+                            </li>
+                          </ul>
+                        </details>
+                      </div>
                     </div>
                   </section>
                 </div>
@@ -262,12 +371,13 @@
                       class="box-body scroll-list sync-panel-body layout-panel-body"
                     >
                       <div class="layout-groups">
-                        <section class="layout-group">
+                        <section class="layout-group" data-layout-type="equal">
                           <h4 class="layout-group-title">Equal</h4>
                           <div class="layout-thumb-grid">
                             {% for image_path in layout_equal_images %}
                             <img
                               class="layout-thumb"
+                              data-layout-type="equal"
                               src="{% static image_path %}"
                               alt="Equal layout {{ forloop.counter }}"
                             />
@@ -279,12 +389,13 @@
                           </div>
                         </section>
 
-                        <section class="layout-group">
+                        <section class="layout-group" data-layout-type="focus">
                           <h4 class="layout-group-title">Focus</h4>
                           <div class="layout-thumb-grid">
                             {% for image_path in layout_focus_images %}
                             <img
                               class="layout-thumb"
+                              data-layout-type="focus"
                               src="{% static image_path %}"
                               alt="Focus layout {{ forloop.counter }}"
                             />
@@ -301,67 +412,355 @@
                 </div>
 
                 <div class="active-conferences-wide">
-                  <h3 class="section-title">Participant List</h3>
+                  <div class="section-title-row">
+                    <h3 class="section-title">Participant List</h3>
+                    <button
+                      type="button"
+                      class="panel-mic-btn mic-all"
+                      title="Mute all participants"
+                      aria-pressed="false"
+                    >
+                      <svg
+                        class="icon-unmuted"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zm-5 8a1 1 0 0 1 1 1 4 4 0 0 0 8 0 1 1 0 1 1 2 0 6 6 0 0 1-5 5.91V21h2a1 1 0 1 1 0 2H9a1 1 0 1 1 0-2h2v-3.09A6 6 0 0 1 6 12a1 1 0 0 1 1-1z"
+                        />
+                      </svg>
+                      <svg
+                        class="icon-muted"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="M6.71 5.29a1 1 0 0 0-1.42 1.42l4.01 4.01V12a3 3 0 1 0 6 0V9.41l2 2V12a6 6 0 0 1-5 5.91V21h2a1 1 0 1 1 0 2H9a1 1 0 1 1 0-2h2v-3.09A6 6 0 0 1 6 12a1 1 0 0 1 2 0 4 4 0 0 0 1.84 3.37L6.71 5.29zM12 3a3 3 0 0 0-3 3v1.59l6 6V6a3 3 0 0 0-3-3zm8.71 16.29a1 1 0 0 1-1.42 1.42l-14-14a1 1 0 1 1 1.42-1.42l14 14z"
+                        />
+                      </svg>
+                    </button>
+                  </div>
                   <div class="active-conferences-scroll">
                     <table>
                       <thead>
                         <tr>
-                          <th>Conference Name</th>
-                          <th>Profile</th>
-                          <th>Participants</th>
-                          <th>Bit Rate</th>
+                          <th>MCU</th>
+                          <th>Name</th>
                           <th>Status</th>
+                          <th>Role</th>
+                          <th>IP Address</th>
+                          <th>SIP</th>
+                          <th>Network</th>
+                          <th>Dialing Direction</th>
+                          <th class="media-sort-head">
+                            <div class="media-sort-head-inner">
+                              <span>Audio</span>
+                              <button
+                                type="button"
+                                class="media-sort-btn"
+                                data-sort-media="audio"
+                                data-sort-direction="off-first"
+                                title="Sort by audio status"
+                                aria-label="Sort by audio status"
+                              >
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                  <path
+                                    d="M7 4h10a1 1 0 1 1 0 2H7a1 1 0 1 1 0-2zm2.71 6.29a1 1 0 0 1 1.42 0L12 11.17l.87-.88a1 1 0 1 1 1.42 1.42l-1.58 1.58a1 1 0 0 1-1.42 0L9.71 11.7a1 1 0 0 1 0-1.41zM7 18h10a1 1 0 1 1 0 2H7a1 1 0 1 1 0-2z"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+                          </th>
+                          <th class="media-sort-head">
+                            <div class="media-sort-head-inner">
+                              <span>Video</span>
+                              <button
+                                type="button"
+                                class="media-sort-btn"
+                                data-sort-media="video"
+                                data-sort-direction="off-first"
+                                title="Sort by video status"
+                                aria-label="Sort by video status"
+                              >
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                  <path
+                                    d="M7 4h10a1 1 0 1 1 0 2H7a1 1 0 1 1 0-2zm2.71 6.29a1 1 0 0 1 1.42 0L12 11.17l.87-.88a1 1 0 1 1 1.42 1.42l-1.58 1.58a1 1 0 0 1-1.42 0L9.71 11.7a1 1 0 0 1 0-1.41zM7 18h10a1 1 0 1 1 0 2H7a1 1 0 1 1 0-2z"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+                          </th>
+                          <th>FECC Token</th>
+                          <th>Content Token</th>
+                          <th>ID</th>
+                          <th class="kick-col">Kick</th>
                         </tr>
                       </thead>
                       <tbody>
                         <tr>
-                          <td>Executive Weekly Review</td>
-                          <td>1080p / AVC-SVC</td>
-                          <td>42</td>
-                          <td>2048 kbps</td>
+                          <td>RMX-01</td>
+                          <td>Nguyen Minh Anh</td>
                           <td class="state ok">Connected</td>
+                          <td>Host</td>
+                          <td>10.20.1.15</td>
+                          <td>1001@vinteo.local</td>
+                          <td>LAN-A</td>
+                          <td>Inbound</td>
+                          <td class="media-cell-col">
+                            <div class="media-cell">
+                              <span class="media-state">On</span>
+                              <button
+                                type="button"
+                                class="media-toggle audio is-on"
+                                data-media="audio"
+                                data-on-label="On"
+                                data-off-label="Off"
+                                aria-pressed="true"
+                                title="Turn off audio"
+                              >
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                  <path
+                                    d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zm-5 8a1 1 0 0 1 1 1 4 4 0 0 0 8 0 1 1 0 1 1 2 0 6 6 0 0 1-5 5.91V21h2a1 1 0 1 1 0 2H9a1 1 0 1 1 0-2h2v-3.09A6 6 0 0 1 6 12a1 1 0 0 1 1-1z"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+                          </td>
+                          <td class="media-cell-col">
+                            <div class="media-cell">
+                              <span class="media-state">On</span>
+                              <button
+                                type="button"
+                                class="media-toggle video is-on"
+                                data-media="video"
+                                data-on-label="On"
+                                data-off-label="Off"
+                                aria-pressed="true"
+                                title="Turn off video"
+                              >
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                  <path
+                                    d="M17 10.5V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3.5l4 4V6.5l-4 4z"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+                          </td>
+                          <td>Yes</td>
+                          <td>Yes</td>
+                          <td>U-001</td>
                         </tr>
                         <tr>
-                          <td>Townhall Overflow</td>
-                          <td>Broadcast Layout</td>
-                          <td>77</td>
-                          <td>3072 kbps</td>
+                          <td>RMX-01</td>
+                          <td>Tran Gia Bao</td>
                           <td class="state ok">Connected</td>
+                          <td>Presenter</td>
+                          <td>10.20.1.18</td>
+                          <td>1002@vinteo.local</td>
+                          <td>LAN-A</td>
+                          <td>Outbound</td>
+                          <td class="media-cell-col">
+                            <div class="media-cell">
+                              <span class="media-state">On</span>
+                              <button
+                                type="button"
+                                class="media-toggle audio is-on"
+                                data-media="audio"
+                                data-on-label="On"
+                                data-off-label="Off"
+                                aria-pressed="true"
+                                title="Turn off audio"
+                              >
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                  <path
+                                    d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zm-5 8a1 1 0 0 1 1 1 4 4 0 0 0 8 0 1 1 0 1 1 2 0 6 6 0 0 1-5 5.91V21h2a1 1 0 1 1 0 2H9a1 1 0 1 1 0-2h2v-3.09A6 6 0 0 1 6 12a1 1 0 0 1 1-1z"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+                          </td>
+                          <td class="media-cell-col">
+                            <div class="media-cell">
+                              <span class="media-state">On</span>
+                              <button
+                                type="button"
+                                class="media-toggle video is-on"
+                                data-media="video"
+                                data-on-label="On"
+                                data-off-label="Off"
+                                aria-pressed="true"
+                                title="Turn off video"
+                              >
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                  <path
+                                    d="M17 10.5V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3.5l4 4V6.5l-4 4z"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+                          </td>
+                          <td>No</td>
+                          <td>Yes</td>
+                          <td>U-002</td>
                         </tr>
                         <tr>
-                          <td>APAC Sales Coordination</td>
-                          <td>720p / Auto Layout</td>
-                          <td>18</td>
-                          <td>1536 kbps</td>
+                          <td>RMX-02</td>
+                          <td>Le Thu Ha</td>
                           <td class="state ok">Connected</td>
+                          <td>Moderator</td>
+                          <td>10.20.2.22</td>
+                          <td>1003@vinteo.local</td>
+                          <td>WAN-1</td>
+                          <td>Inbound</td>
+                          <td class="media-cell-col">
+                            <div class="media-cell">
+                              <span class="media-state">On</span>
+                              <button
+                                type="button"
+                                class="media-toggle audio is-on"
+                                data-media="audio"
+                                data-on-label="On"
+                                data-off-label="Off"
+                                aria-pressed="true"
+                                title="Turn off audio"
+                              >
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                  <path
+                                    d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zm-5 8a1 1 0 0 1 1 1 4 4 0 0 0 8 0 1 1 0 1 1 2 0 6 6 0 0 1-5 5.91V21h2a1 1 0 1 1 0 2H9a1 1 0 1 1 0-2h2v-3.09A6 6 0 0 1 6 12a1 1 0 0 1 1-1z"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+                          </td>
+                          <td class="media-cell-col">
+                            <div class="media-cell">
+                              <span class="media-state">Off</span>
+                              <button
+                                type="button"
+                                class="media-toggle video is-off"
+                                data-media="video"
+                                data-on-label="On"
+                                data-off-label="Off"
+                                aria-pressed="false"
+                                title="Turn on video"
+                              >
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                  <path
+                                    d="M17 10.5V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3.5l4 4V6.5l-4 4z"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+                          </td>
+                          <td>No</td>
+                          <td>No</td>
+                          <td>U-003</td>
                         </tr>
                         <tr>
-                          <td>Support War Room</td>
-                          <td>Secure Bridge</td>
-                          <td>29</td>
-                          <td>2048 kbps</td>
+                          <td>RMX-02</td>
+                          <td>Pham Quoc Dat</td>
                           <td class="state warn">Standby</td>
+                          <td>Guest</td>
+                          <td>10.20.2.31</td>
+                          <td>1004@vinteo.local</td>
+                          <td>WAN-1</td>
+                          <td>Outbound</td>
+                          <td class="media-cell-col">
+                            <div class="media-cell">
+                              <span class="media-state">Off</span>
+                              <button
+                                type="button"
+                                class="media-toggle audio is-off"
+                                data-media="audio"
+                                data-on-label="On"
+                                data-off-label="Off"
+                                aria-pressed="false"
+                                title="Turn on audio"
+                              >
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                  <path
+                                    d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zm-5 8a1 1 0 0 1 1 1 4 4 0 0 0 8 0 1 1 0 1 1 2 0 6 6 0 0 1-5 5.91V21h2a1 1 0 1 1 0 2H9a1 1 0 1 1 0-2h2v-3.09A6 6 0 0 1 6 12a1 1 0 0 1 1-1z"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+                          </td>
+                          <td class="media-cell-col">
+                            <div class="media-cell">
+                              <span class="media-state">On</span>
+                              <button
+                                type="button"
+                                class="media-toggle video is-on"
+                                data-media="video"
+                                data-on-label="On"
+                                data-off-label="Off"
+                                aria-pressed="true"
+                                title="Turn off video"
+                              >
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                  <path
+                                    d="M17 10.5V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3.5l4 4V6.5l-4 4z"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+                          </td>
+                          <td>No</td>
+                          <td>No</td>
+                          <td>U-004</td>
                         </tr>
                         <tr>
-                          <td>Partner Onboarding</td>
-                          <td>Lecture Mode</td>
-                          <td>11</td>
-                          <td>1024 kbps</td>
+                          <td>RMX-03</td>
+                          <td>Hoang Kim Ngan</td>
                           <td class="state warn">Scheduling</td>
-                        </tr>
-                        <tr>
-                          <td>Partner Onboarding</td>
-                          <td>Lecture Mode</td>
-                          <td>11</td>
-                          <td>1024 kbps</td>
-                          <td class="state warn">Scheduling</td>
-                        </tr>
-                        <tr>
-                          <td>Partner Onboarding</td>
-                          <td>Lecture Mode</td>
-                          <td>11</td>
-                          <td>1024 kbps</td>
-                          <td class="state warn">Scheduling</td>
+                          <td>Guest</td>
+                          <td>10.20.3.19</td>
+                          <td>1005@vinteo.local</td>
+                          <td>VPN</td>
+                          <td>Inbound</td>
+                          <td class="media-cell-col">
+                            <div class="media-cell">
+                              <span class="media-state">On</span>
+                              <button
+                                type="button"
+                                class="media-toggle audio is-on"
+                                data-media="audio"
+                                data-on-label="On"
+                                data-off-label="Off"
+                                aria-pressed="true"
+                                title="Turn off audio"
+                              >
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                  <path
+                                    d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zm-5 8a1 1 0 0 1 1 1 4 4 0 0 0 8 0 1 1 0 1 1 2 0 6 6 0 0 1-5 5.91V21h2a1 1 0 1 1 0 2H9a1 1 0 1 1 0-2h2v-3.09A6 6 0 0 1 6 12a1 1 0 0 1 1-1z"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+                          </td>
+                          <td class="media-cell-col">
+                            <div class="media-cell">
+                              <span class="media-state">Off</span>
+                              <button
+                                type="button"
+                                class="media-toggle video is-off"
+                                data-media="video"
+                                data-on-label="On"
+                                data-off-label="Off"
+                                aria-pressed="false"
+                                title="Turn on video"
+                              >
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                  <path
+                                    d="M17 10.5V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3.5l4 4V6.5l-4 4z"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+                          </td>
+                          <td>No</td>
+                          <td>No</td>
+                          <td>U-005</td>
                         </tr>
                       </tbody>
                     </table>
@@ -373,18 +772,493 @@
         </main>
       </div>
     </div>
+    <div class="confirm-modal" id="kick-confirm-modal" hidden>
+      <div class="confirm-modal-backdrop" data-kick-modal-close></div>
+      <div
+        class="confirm-modal-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="kick-confirm-title"
+        aria-describedby="kick-confirm-message"
+      >
+        <h4 id="kick-confirm-title" class="confirm-modal-title">
+          Confirm Kick
+        </h4>
+        <p id="kick-confirm-message" class="confirm-modal-message">
+          Are you sure you want to kick this participant out of this meeting?
+        </p>
+        <div class="confirm-modal-actions">
+          <button
+            type="button"
+            class="confirm-modal-btn"
+            data-kick-cancel
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="confirm-modal-btn danger"
+            data-kick-confirm
+          >
+            Kick
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="confirm-modal" id="leave-confirm-modal" hidden>
+      <div class="confirm-modal-backdrop" data-leave-modal-close></div>
+      <div
+        class="confirm-modal-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="leave-confirm-title"
+        aria-describedby="leave-confirm-message"
+      >
+        <h4 id="leave-confirm-title" class="confirm-modal-title">
+          Confirm Leave
+        </h4>
+        <p id="leave-confirm-message" class="confirm-modal-message">
+          Are you sure you want to leave this meeting?
+        </p>
+        <div class="confirm-modal-actions">
+          <button
+            type="button"
+            class="confirm-modal-btn"
+            data-leave-cancel
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="confirm-modal-btn danger"
+            data-leave-confirm
+          >
+            Leave
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="confirm-modal" id="address-participant-modal" hidden>
+      <div class="confirm-modal-backdrop" data-address-modal-close></div>
+      <div
+        class="confirm-modal-card address-participant-modal-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="address-participant-title"
+      >
+        <h4 id="address-participant-title" class="confirm-modal-title">
+          Add Participant
+        </h4>
+        <div class="address-modal-target">
+          Target Group:
+          <span id="address-modal-group-name">-</span>
+        </div>
+        <form id="address-participant-form" class="address-participant-form">
+          <label class="address-field">
+            <span>Name</span>
+            <input
+              id="ab-participant-name"
+              name="name"
+              type="text"
+              required
+              maxlength="80"
+              autocomplete="off"
+            />
+          </label>
+          <label class="address-field">
+            <span>Dialing Direction</span>
+            <select name="dialing_direction">
+              <option>Dial out</option>
+              <option>Dial in</option>
+            </select>
+          </label>
+          <label class="address-field">
+            <span>Type</span>
+            <select name="endpoint_type">
+              <option>H.323</option>
+              <option>SIP</option>
+            </select>
+          </label>
+          <label class="address-field address-field-wide">
+            <span>IP Address</span>
+            <input name="ip_address" type="text" maxlength="64" />
+          </label>
+          <div class="address-field-combo">
+            <label class="address-field">
+              <span>Alias Name</span>
+              <input name="alias_name" type="text" maxlength="64" />
+            </label>
+            <label class="address-field">
+              <span>Alias Type</span>
+              <select name="alias_type">
+                <option>H.323 ID</option>
+                <option>SIP URI</option>
+                <option>E.164</option>
+              </select>
+            </label>
+          </div>
+          <label class="address-field address-field-wide">
+            <span>Website IP Address</span>
+            <input name="website_ip" type="text" maxlength="64" />
+          </label>
+          <label class="address-check-field">
+            <input type="checkbox" name="audio_only" />
+            <span>Audio Only</span>
+          </label>
+          <label class="address-field address-field-wide">
+            <span>Extension/Identifier String</span>
+            <input name="extension" type="text" maxlength="64" />
+          </label>
+          <div class="confirm-modal-actions">
+            <button type="button" class="confirm-modal-btn" data-address-cancel>
+              Cancel
+            </button>
+            <button type="submit" class="confirm-modal-btn danger">OK</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="confirm-modal" id="address-group-modal" hidden>
+      <div class="confirm-modal-backdrop" data-address-group-modal-close></div>
+      <div
+        class="confirm-modal-card address-group-modal-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="address-group-title"
+      >
+        <h4 id="address-group-title" class="confirm-modal-title">Add Group</h4>
+        <form id="address-group-form" class="address-group-form">
+          <div class="address-modal-target">
+            Parent Group:
+            <span id="address-group-parent-name">-</span>
+          </div>
+          <label class="address-field address-field-wide">
+            <span>Group Name</span>
+            <input
+              id="ab-group-name"
+              name="group_name"
+              type="text"
+              required
+              maxlength="80"
+              autocomplete="off"
+            />
+          </label>
+          <div class="confirm-modal-actions">
+            <button
+              type="button"
+              class="confirm-modal-btn"
+              data-address-group-cancel
+            >
+              Cancel
+            </button>
+            <button type="submit" class="confirm-modal-btn danger">OK</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <script src="{% static 'js/layout-manager.js' %}?v=20260316-1"></script>
+    <script src="{% static 'js/popup-manager.js' %}?v=20260316-1"></script>
+    <script src="{% static 'js/address-book-manager.js' %}?v=20260316-2"></script>
     <script>
       (function () {
-        function initMicToggle() {
-          const micButton = document.querySelector(".zoom-control-btn.mic");
-          if (!micButton) return;
+        function setParticipantMediaState(button, shouldBeOn) {
+          if (!button) return;
 
-          micButton.addEventListener("click", function () {
-            const isMuted = micButton.classList.toggle("is-muted");
-            micButton.setAttribute("aria-pressed", String(isMuted));
-            micButton.title = isMuted
-              ? "Unmute participant microphones"
-              : "Mute participant microphones";
+          const mediaType = button.dataset.media || "media";
+          const onLabel = button.dataset.onLabel || "On";
+          const offLabel = button.dataset.offLabel || "Off";
+          const stateText = button
+            .closest(".media-cell")
+            ?.querySelector(".media-state");
+
+          button.classList.toggle("is-on", shouldBeOn);
+          button.classList.toggle("is-off", !shouldBeOn);
+          button.setAttribute("aria-pressed", String(shouldBeOn));
+          button.title = shouldBeOn
+            ? "Turn off " + mediaType
+            : "Turn on " + mediaType;
+
+          if (stateText) {
+            stateText.textContent = shouldBeOn ? onLabel : offLabel;
+          }
+        }
+
+        function syncMuteAllButtonState() {
+          const muteAllButton = document.querySelector(
+            ".panel-mic-btn.mic-all",
+          );
+          const audioButtons = Array.from(
+            document.querySelectorAll(".media-toggle.audio"),
+          );
+
+          if (!muteAllButton) return;
+
+          if (audioButtons.length === 0) {
+            muteAllButton.classList.remove("is-muted");
+            muteAllButton.setAttribute("aria-pressed", "false");
+            muteAllButton.title = "Mute all participants";
+            return;
+          }
+
+          const allMuted = audioButtons.every(function (button) {
+            return button.classList.contains("is-off");
+          });
+
+          muteAllButton.classList.toggle("is-muted", allMuted);
+          muteAllButton.setAttribute("aria-pressed", String(allMuted));
+          muteAllButton.title = allMuted
+            ? "Unmute all participants"
+            : "Mute all participants";
+        }
+
+        function initMicToggle() {
+          const muteAllButton = document.querySelector(
+            ".panel-mic-btn.mic-all",
+          );
+          if (!muteAllButton) return;
+
+          muteAllButton.addEventListener("click", function () {
+            const willMuteAll = !muteAllButton.classList.contains("is-muted");
+            const audioButtons = document.querySelectorAll(
+              ".media-toggle.audio",
+            );
+
+            audioButtons.forEach(function (button) {
+              setParticipantMediaState(button, !willMuteAll);
+            });
+
+            syncMuteAllButtonState();
+          });
+
+          syncMuteAllButtonState();
+        }
+
+        function initParticipantMediaToggles() {
+          const mediaButtons = document.querySelectorAll(".media-toggle");
+          if (!mediaButtons.length) return;
+
+          mediaButtons.forEach(function (button) {
+            button.addEventListener("click", function () {
+              const isOn = button.classList.contains("is-on");
+              setParticipantMediaState(button, !isOn);
+              if (button.classList.contains("audio")) {
+                syncMuteAllButtonState();
+              }
+            });
+          });
+        }
+
+        function initMediaSortButtons() {
+          const table = document.querySelector(".active-conferences-scroll table");
+          const tableBody = table ? table.querySelector("tbody") : null;
+          const sortButtons = document.querySelectorAll(".media-sort-btn");
+          if (!tableBody || !sortButtons.length) return;
+
+          function getMediaStateWeight(row, mediaType) {
+            const toggle = row.querySelector(".media-toggle." + mediaType);
+            if (!toggle) return 0;
+            return toggle.classList.contains("is-on") ? 1 : 0;
+          }
+
+          sortButtons.forEach(function (button) {
+            button.addEventListener("click", function () {
+              const mediaType = button.dataset.sortMedia;
+              if (!mediaType) return;
+
+              const direction = button.dataset.sortDirection || "off-first";
+              const rows = Array.from(tableBody.querySelectorAll("tr")).map(
+                function (row, index) {
+                  return { row: row, index: index };
+                },
+              );
+
+              rows.sort(function (a, b) {
+                const aWeight = getMediaStateWeight(a.row, mediaType);
+                const bWeight = getMediaStateWeight(b.row, mediaType);
+
+                if (aWeight !== bWeight) {
+                  if (direction === "off-first") {
+                    return aWeight - bWeight;
+                  }
+                  return bWeight - aWeight;
+                }
+
+                return a.index - b.index;
+              });
+
+              rows.forEach(function (entry) {
+                tableBody.appendChild(entry.row);
+              });
+
+              button.dataset.sortDirection =
+                direction === "off-first" ? "on-first" : "off-first";
+            });
+          });
+        }
+
+        function initSystemTimeClock() {
+          const systemTimeValue = document.getElementById("system-time-value");
+          if (!systemTimeValue) return;
+
+          const monthNames = [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+          ];
+
+          function pad2(value) {
+            return String(value).padStart(2, "0");
+          }
+
+          function renderTime() {
+            const now = new Date();
+            const text =
+              pad2(now.getDate()) +
+              "-" +
+              monthNames[now.getMonth()] +
+              "-" +
+              now.getFullYear() +
+              " " +
+              pad2(now.getHours()) +
+              ":" +
+              pad2(now.getMinutes()) +
+              ":" +
+              pad2(now.getSeconds());
+            systemTimeValue.textContent = text;
+          }
+
+          renderTime();
+          window.setInterval(renderTime, 1000);
+        }
+
+        function createKickButton(memberName) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "kick-btn";
+          button.dataset.memberName = memberName;
+          button.title = "Kick " + memberName;
+          button.setAttribute("aria-label", "Kick " + memberName);
+          button.innerHTML =
+            '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+            '<path d="M10 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm0 10c-3.87 0-7 2.01-7 4.5V20h10.48a5.43 5.43 0 0 1-.48-2.25c0-1.42.55-2.7 1.45-3.66A13.8 13.8 0 0 0 10 14z"/>' +
+            '<path d="M15.71 14.29a1 1 0 0 0-1.42 1.42L15.59 17l-1.3 1.29a1 1 0 1 0 1.42 1.42L17 18.41l1.29 1.3a1 1 0 0 0 1.42-1.42L18.41 17l1.3-1.29a1 1 0 0 0-1.42-1.42L17 15.59l-1.29-1.3z"/>' +
+            "</svg>";
+          return button;
+        }
+
+        function initKickMemberButtons() {
+          const participantTable = document.querySelector(
+            ".active-conferences-scroll table",
+          );
+          const tableBody = participantTable
+            ? participantTable.querySelector("tbody")
+            : null;
+          const popupManager = window.DashboardPopupManager;
+          const kickPopup =
+            popupManager &&
+            typeof popupManager.createConfirmPopup === "function"
+              ? popupManager.createConfirmPopup({
+                  modalId: "kick-confirm-modal",
+                  messageSelector: "#kick-confirm-message",
+                  confirmSelector: "[data-kick-confirm]",
+                  cancelSelector: "[data-kick-cancel]",
+                  closeSelector: "[data-kick-modal-close]",
+                })
+              : null;
+
+          if (!participantTable || !tableBody) return;
+
+          Array.from(tableBody.querySelectorAll("tr")).forEach(function (row) {
+            if (row.querySelector("td.kick-col")) return;
+
+            const nameCell = row.children[1];
+            const memberName = nameCell
+              ? nameCell.textContent.trim()
+              : "participant";
+
+            const actionCell = document.createElement("td");
+            actionCell.className = "kick-col";
+
+            const actionWrap = document.createElement("div");
+            actionWrap.className = "kick-cell";
+            actionWrap.appendChild(createKickButton(memberName));
+
+            actionCell.appendChild(actionWrap);
+            row.appendChild(actionCell);
+          });
+
+          if (tableBody.dataset.kickBound === "1") return;
+          tableBody.dataset.kickBound = "1";
+
+          tableBody.addEventListener("click", function (event) {
+            const kickButton = event.target.closest(".kick-btn");
+            if (!kickButton) return;
+
+            const targetRow = kickButton.closest("tr");
+            if (!targetRow) return;
+
+            const memberName = kickButton.dataset.memberName || "participant";
+            const usedModal =
+              kickPopup &&
+              kickPopup.open({
+                message:
+                  "Are you sure you want to kick " +
+                  memberName +
+                  " out of this meeting?",
+                onConfirm: function () {
+                  targetRow.remove();
+                  syncMuteAllButtonState();
+                },
+              });
+            if (usedModal) return;
+
+            const accepted = window.confirm(
+              "Are you sure you want to kick " +
+                memberName +
+                " out of this meeting?",
+            );
+            if (accepted) {
+              targetRow.remove();
+              syncMuteAllButtonState();
+            }
+          });
+        }
+
+        function initLeaveConferenceConfirm() {
+          const leaveButton = document.querySelector(".zoom-control-btn.leave");
+          const popupManager = window.DashboardPopupManager;
+          const leavePopup =
+            popupManager &&
+            typeof popupManager.createConfirmPopup === "function"
+              ? popupManager.createConfirmPopup({
+                  modalId: "leave-confirm-modal",
+                  messageSelector: "#leave-confirm-message",
+                  confirmSelector: "[data-leave-confirm]",
+                  cancelSelector: "[data-leave-cancel]",
+                  closeSelector: "[data-leave-modal-close]",
+                })
+              : null;
+
+          if (!leaveButton) return;
+
+          leaveButton.addEventListener("click", function () {
+            const usedModal =
+              leavePopup &&
+              leavePopup.open({
+                message: "Are you sure you want to leave this meeting?",
+                onConfirm: function () {},
+              });
+            if (usedModal) return;
+            window.confirm("Are you sure you want to leave this meeting?");
           });
         }
 
@@ -487,7 +1361,25 @@
         }
 
         window.addEventListener("load", function () {
+          initSystemTimeClock();
           initMicToggle();
+          initParticipantMediaToggles();
+          initMediaSortButtons();
+          initKickMemberButtons();
+          initLeaveConferenceConfirm();
+          if (
+            window.DashboardAddressBookManager &&
+            typeof window.DashboardAddressBookManager.initAddressBookManager ===
+              "function"
+          ) {
+            window.DashboardAddressBookManager.initAddressBookManager();
+          }
+          if (
+            window.DashboardLayout &&
+            typeof window.DashboardLayout.initLayoutSelector === "function"
+          ) {
+            window.DashboardLayout.initLayoutSelector();
+          }
           syncDashboardLayoutHeights();
           window.requestAnimationFrame(syncDashboardLayoutHeights);
         });
@@ -496,3 +1388,10 @@
     </script>
   </body>
 </html>
+
+
+
+
+
+
+
