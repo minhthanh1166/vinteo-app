@@ -1,0 +1,48 @@
+<aside class="sidebar">
+          <section class="nav-panel">
+            <div class="panel-caption conference-caption">
+              <span>Conference List</span>
+              <div
+                class="conference-caption-actions"
+                aria-label="Conference actions"
+              >
+                <button
+                  type="button"
+                  class="address-icon-btn"
+                  data-conference-action="add-conference"
+                  title="Add conference"
+                  aria-label="Add conference"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                      d="M19 11h-6V5a1 1 0 0 0-2 0v6H5a1 1 0 0 0 0 2h6v6a1 1 0 0 0 2 0v-6h6a1 1 0 0 0 0-2z"
+                    />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  class="address-icon-btn is-danger"
+                  data-conference-action="delete-conference"
+                  title="Delete conference"
+                  aria-label="Delete conference"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M19 11H5a1 1 0 0 0 0 2h14a1 1 0 0 0 0-2z" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="conference-toolbar conference-search-toolbar">
+              <input
+                id="conference-search-input"
+                class="conference-search-input"
+                type="search"
+                placeholder="Search by ID or description"
+                aria-label="Search by ID or description"
+                autocomplete="off"
+              />
+            </div>
+            <ul class="conference-list"></ul>
+          </section>
+        </aside>
+

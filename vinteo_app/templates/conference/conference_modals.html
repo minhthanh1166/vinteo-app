@@ -1,0 +1,561 @@
+<div class="confirm-modal" id="conference-create-modal" hidden>
+  <div class="confirm-modal-backdrop" data-conference-modal-close></div>
+  <div
+    class="confirm-modal-card add-conference-modal-card"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="conference-create-title"
+  >
+    <button
+      type="button"
+      class="conference-modal-close"
+      data-conference-modal-close
+      aria-label="Close add conference dialog"
+    >
+      x
+    </button>
+    <h4 id="conference-create-title" class="confirm-modal-title">
+      Add new conference
+    </h4>
+    <form id="conference-create-form" class="conference-create-form">
+      <div class="conference-create-body">
+        <section class="conference-field-block">
+          <label for="conference-number">ID</label>
+          <div class="conference-input-with-icon">
+            <span class="conference-input-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false">
+                <path
+                  d="M17 10.5V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3.5l4 4V6.5l-4 4z"
+                />
+              </svg>
+            </span>
+            <input
+              id="conference-number"
+              name="number"
+              type="number"
+              min="1000"
+              max="1999"
+              step="1"
+            />
+          </div>
+          <p class="conference-help">
+            Must be only numbers. Minimum value 1000, maximum value 1999.
+          </p>
+        </section>
+
+        <section class="conference-field-block">
+          <label for="conference-description">Description</label>
+          <div class="conference-input-with-icon">
+            <span class="conference-input-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false">
+                <path
+                  d="M20 10V7.41a2 2 0 0 0-.59-1.41l-1.41-1.41A2 2 0 0 0 16.59 4H10a2 2 0 0 0-2 2v2H6a2 2 0 0 0-1.41.59l-.59.59a2 2 0 0 0 0 2.82L10 18l7.18-7.18A2 2 0 0 0 18 10h2zm-9.5-1A1.5 1.5 0 1 1 12 7.5 1.5 1.5 0 0 1 10.5 9z"
+                />
+              </svg>
+            </span>
+            <input
+              id="conference-description"
+              name="description"
+              type="text"
+              maxlength="120"
+              autocomplete="off"
+            />
+          </div>
+        </section>
+
+        <section class="conference-field-block conference-moderators-block">
+          <h5 class="conference-subtitle">Moderators</h5>
+          <div class="conference-moderator-toolbar">
+            <label
+              class="conference-search-wrap"
+              for="conference-moderator-search"
+            >
+              <span class="conference-input-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false">
+                  <path
+                    d="M10 4a6 6 0 1 0 3.87 10.58l4.27 4.27a1 1 0 0 0 1.41-1.41l-4.27-4.27A6 6 0 0 0 10 4zm0 2a4 4 0 1 1 0 8 4 4 0 0 1 0-8z"
+                  />
+                </svg>
+              </span>
+              <input
+                id="conference-moderator-search"
+                type="text"
+                placeholder="Search..."
+                autocomplete="off"
+              />
+            </label>
+            <select id="conference-moderator-type">
+              <option value="all">All</option>
+              <option value="h323">H323</option>
+              <option value="sip">SIP</option>
+            </select>
+            <label
+              class="conference-toggle-inline"
+              for="conference-show-selected"
+            >
+              <input id="conference-show-selected" type="checkbox" />
+              <span>Show selected</span>
+            </label>
+          </div>
+
+          <div
+            class="conference-moderator-list"
+            id="conference-moderator-list"
+          ></div>
+
+          <p class="conference-help">
+            Choose the accounts for giving moderator rights.
+          </p>
+        </section>
+      </div>
+      <p
+        class="conference-form-feedback"
+        id="conference-create-feedback"
+        hidden
+      ></p>
+
+      <div class="confirm-modal-actions conference-create-actions">
+        <button type="button" class="confirm-modal-btn" data-conference-cancel>
+          Cancel
+        </button>
+        <button type="submit" class="confirm-modal-btn conference-submit-btn">
+          + Add
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+<div class="confirm-modal" id="conference-setting-modal" hidden>
+  <div class="confirm-modal-backdrop" data-conference-setting-modal-close></div>
+  <div
+    class="confirm-modal-card conference-setting-modal-card"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="conference-setting-title"
+  >
+    <button
+      type="button"
+      class="conference-modal-close"
+      data-conference-setting-modal-close
+      aria-label="Close conference setting dialog"
+    >
+      x
+    </button>
+    <h4 id="conference-setting-title" class="confirm-modal-title">
+      Conference Settings
+    </h4>
+    <form id="conference-setting-form" class="conference-setting-form">
+      <div class="conference-setting-tabs" role="tablist">
+        <button
+          type="button"
+          class="conference-setting-tab is-active"
+          data-setting-tab-target="main"
+          aria-selected="true"
+        >
+          Main
+        </button>
+        <button
+          type="button"
+          class="conference-setting-tab"
+          data-setting-tab-target="call"
+          aria-selected="false"
+        >
+          Call
+        </button>
+        <button
+          type="button"
+          class="conference-setting-tab"
+          data-setting-tab-target="connection"
+          aria-selected="false"
+        >
+          Connection
+        </button>
+        <button
+          type="button"
+          class="conference-setting-tab"
+          data-setting-tab-target="advanced"
+          aria-selected="false"
+        >
+          Advanced
+        </button>
+      </div>
+
+      <div class="conference-setting-body">
+        <section
+          class="conference-setting-panel is-active"
+          data-setting-tab-panel="main"
+        >
+          <div class="conference-setting-grid">
+            <label class="conference-setting-field">
+              <span>Conference</span>
+              <input
+                id="setting-conference-number"
+                name="conference_number"
+                type="text"
+                readonly
+              />
+            </label>
+            <label class="conference-setting-field">
+              <span>Description</span>
+              <input
+                id="setting-conference-description"
+                name="description"
+                type="text"
+                maxlength="120"
+              />
+            </label>
+            <label class="conference-setting-field conference-setting-pin-row">
+              <span>PIN</span>
+              <div class="conference-setting-inline">
+                <input
+                  id="setting-conference-pin"
+                  name="pin"
+                  type="text"
+                  maxlength="15"
+                  inputmode="numeric"
+                />
+                <button
+                  type="button"
+                  class="confirm-modal-btn"
+                  data-setting-action="generate-pin"
+                >
+                  Generate
+                </button>
+              </div>
+            </label>
+            <section
+              class="conference-setting-field conference-setting-field-wide"
+            >
+              <span>Moderators</span>
+              <div class="conference-setting-moderator-toolbar">
+                <input
+                  id="setting-moderator-search"
+                  type="search"
+                  placeholder="Search moderator..."
+                  autocomplete="off"
+                />
+                <select id="setting-moderator-type" name="moderator_type">
+                  <option value="all">All</option>
+                  <option value="h323">H323</option>
+                  <option value="sip">SIP</option>
+                </select>
+              </div>
+              <div
+                class="conference-setting-moderator-list"
+                id="setting-moderator-list"
+              ></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="conference-setting-panel" data-setting-tab-panel="call">
+          <div class="conference-setting-grid conference-setting-grid-call">
+            <label class="conference-setting-field">
+              <span>Participant call duration (sec.)</span>
+              <input
+                name="callDuration"
+                type="number"
+                min="1"
+                max="60"
+                step="1"
+                value="30"
+              />
+              <small class="conference-setting-note"
+                >Valid values are from 1 to 60</small
+              >
+            </label>
+            <label class="conference-setting-field">
+              <span>Number of call attempts</span>
+              <input
+                name="callAttempt"
+                type="number"
+                min="1"
+                max="9"
+                step="1"
+                value="1"
+              />
+              <small class="conference-setting-note"
+                >Valid values are from 1 to 9</small
+              >
+            </label>
+            <label class="conference-setting-field">
+              <span>Interval between calls (sec.)</span>
+              <input
+                name="callInterval"
+                type="number"
+                min="1"
+                max="180"
+                step="1"
+                value="60"
+              />
+              <small class="conference-setting-note"
+                >Valid values are from 1 to 180</small
+              >
+            </label>
+            <section class="conference-setting-subsection">
+              <h5 class="conference-setting-subsection-title">
+                Default connection settings for anonymous participants
+              </h5>
+              <div class="conference-setting-anonymous-stack">
+                <label class="conference-setting-field">
+                  <span>Bandwidth</span>
+                  <select name="anonymousBandwidth">
+                    <option value="64">64 Kb/s</option>
+                    <option value="128">128 Kb/s</option>
+                    <option value="256">256 Kb/s</option>
+                    <option value="320">320 Kb/s</option>
+                    <option value="384">384 Kb/s</option>
+                    <option value="448">448 Kb/s</option>
+                    <option value="512">512 Kb/s</option>
+                    <option value="768">768 Kb/s</option>
+                    <option value="1024" selected>1 Mb/s</option>
+                    <option value="1536">1.5 Mb/s</option>
+                    <option value="2048">2 Mb/s</option>
+                    <option value="2560">2.5 Mb/s</option>
+                    <option value="3072">3 Mb/s</option>
+                    <option value="3584">3.5 Mb/s</option>
+                    <option value="4096">4 Mb/s</option>
+                    <option value="4608">4.5 Mb/s</option>
+                    <option value="5120">5 Mb/s</option>
+                    <option value="5632">5.5 Mb/s</option>
+                    <option value="6144">6 Mb/s</option>
+                    <option value="7168">7 Mb/s</option>
+                    <option value="8192">8 Mb/s</option>
+                    <option value="9216">9 Mb/s</option>
+                    <option value="10240">10 Mb/s</option>
+                  </select>
+                </label>
+                <label class="conference-setting-field">
+                  <span>Resolution</span>
+                  <select name="anonymousResolution">
+                    <option value="UHD">UltraHD (4K) 3840x2160</option>
+                    <option value="FULLHD">FullHD 1920x1080</option>
+                    <option value="16CIF">16CIF 1408x1152</option>
+                    <option value="720p" selected>HD 1280x720</option>
+                    <option value="XGA">XGA 1024x768</option>
+                    <option value="960x540">540p 960x540</option>
+                    <option value="848x480">480p 848x480</option>
+                    <option value="SVGA">SVGA 800x600</option>
+                    <option value="PAL">PAL 768x576</option>
+                    <option value="576p">576p 1024x576</option>
+                    <option value="4CIF">4CIF 704x576</option>
+                    <option value="4SIF">4SIF 704x480</option>
+                    <option value="VGA">VGA 640x480</option>
+                    <option value="640x360">360p 640x360</option>
+                    <option value="CIF">CIF 352x288</option>
+                    <option value="SIF">SIF 352x240</option>
+                    <option value="QCIF">QCIF 176x144</option>
+                    <option value="QSIF">QSIF 176x120</option>
+                    <option value="1792x1008">1792x1008</option>
+                    <option value="1664x936">1664x936</option>
+                    <option value="1536x864">1536x864</option>
+                    <option value="1408x792">1408x792</option>
+                    <option value="1152x648">1152x648</option>
+                    <option value="1024x576">1024x576</option>
+                    <option value="768x432">768x432</option>
+                    <option value="480p">720x480</option>
+                    <option value="512x288">512x288</option>
+                    <option value="384x216">384x216</option>
+                    <option value="320x180">320x180</option>
+                    <option value="256x144">256x144</option>
+                    <option value="128x72">128x72</option>
+                  </select>
+                </label>
+                <label class="conference-setting-field">
+                  <span>FPS</span>
+                  <select name="anonymousFPS">
+                    <option value="15">15</option>
+                    <option value="25" selected>25</option>
+                    <option value="30">30</option>
+                    <option value="60">60</option>
+                  </select>
+                </label>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section
+          class="conference-setting-panel"
+          data-setting-tab-panel="connection"
+        >
+          <div class="conference-setting-grid">
+            <label class="conference-setting-field">
+              <span>Maximum number of participants</span>
+              <input name="maxParticipants" type="number" min="0" value="0" />
+            </label>
+            <label class="conference-setting-toggle">
+              <input type="checkbox" name="displayNotification" />
+              <span>Enable notification when connecting</span>
+            </label>
+            <label class="conference-setting-toggle">
+              <input type="checkbox" name="allowAnonymousCalls" checked />
+              <span>Allow anonymous connections to the conference</span>
+            </label>
+            <label class="conference-setting-toggle">
+              <input type="checkbox" name="openConference" />
+              <span>Open conference</span>
+            </label>
+            <label class="conference-setting-toggle">
+              <input type="checkbox" name="shutdown" />
+              <span>Do not end the conference</span>
+            </label>
+            <label class="conference-setting-toggle">
+              <input type="checkbox" name="reCall" />
+              <span>Recall self disconnected participants</span>
+            </label>
+            <label class="conference-setting-toggle">
+              <input type="checkbox" name="micOff" />
+              <span>Automatic mute on connection</span>
+            </label>
+            <label class="conference-setting-toggle">
+              <input type="checkbox" name="callPartsOnModerSignIn" />
+              <span>Call all participants after moderator join</span>
+            </label>
+            <label class="conference-setting-toggle">
+              <input type="checkbox" name="disconnectPartsOnModerSignOut" />
+              <span>Drop all participants after moderator disconnect</span>
+            </label>
+            <label class="conference-setting-toggle">
+              <input type="checkbox" name="enableScreenshots" checked />
+              <span>Show screenshots after connecting</span>
+            </label>
+            <label class="conference-setting-toggle">
+              <input type="checkbox" name="logs" />
+              <span>Enable layout logs</span>
+            </label>
+            <label class="conference-setting-toggle">
+              <input type="checkbox" name="allowRequestWord" checked />
+              <span>Allow participants to request the word</span>
+            </label>
+            <label class="conference-setting-toggle">
+              <input type="checkbox" name="allowWhiteboard" />
+              <span>Allow participants to use the whiteboard</span>
+            </label>
+            <label class="conference-setting-toggle">
+              <input type="checkbox" name="audioTag" />
+              <span>Enable audio tags in conference</span>
+            </label>
+            <label class="conference-setting-toggle">
+              <input type="checkbox" name="videoWatermark" />
+              <span>Enable video tags for WebRTC connections</span>
+            </label>
+            <label class="conference-setting-toggle">
+              <input type="checkbox" name="allowReactions" />
+              <span>Enable reactions</span>
+            </label>
+          </div>
+        </section>
+
+        <section
+          class="conference-setting-panel"
+          data-setting-tab-panel="advanced"
+        >
+          <div class="conference-setting-grid">
+            <label class="conference-setting-field">
+              <span>Client resolution selection optimisation</span>
+              <select name="clientOptimisationMode">
+                <option value="0">Disabled</option>
+                <option value="1" selected>Enabled</option>
+                <option value="2">Minimal</option>
+              </select>
+            </label>
+            <label class="conference-setting-field">
+              <span>Client devices synchronization mode</span>
+              <select name="peripherySyncMode">
+                <option value="0">Off</option>
+                <option value="1" selected>Duplex</option>
+              </select>
+            </label>
+            <label class="conference-setting-field">
+              <span>Visible connections for participants</span>
+              <select name="connectionsExposureMode">
+                <option value="0" selected>
+                  All except intentionally hidden
+                </option>
+                <option value="1">None at all</option>
+                <option value="2">Visible on screen</option>
+                <option value="3">All like moderator</option>
+              </select>
+            </label>
+            <label class="conference-setting-field">
+              <span>WebRTC participants connection mode</span>
+              <select name="webrtcConnectionModeNegotiation">
+                <option value="0" selected>
+                  Force to connect as participant
+                </option>
+                <option value="1">At the client discretion</option>
+                <option value="2">Force to connect at spectator</option>
+              </select>
+            </label>
+            <label class="conference-setting-field">
+              <span>Presentation FPS</span>
+              <select name="presentationFPS">
+                <option value="1">1</option>
+                <option value="3">3</option>
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="15" selected>15</option>
+                <option value="25">25</option>
+                <option value="30">30</option>
+                <option value="60">60</option>
+              </select>
+            </label>
+          </div>
+        </section>
+      </div>
+      <p
+        class="conference-form-feedback conference-setting-feedback"
+        id="conference-setting-feedback"
+        hidden
+      ></p>
+
+      <div class="confirm-modal-actions conference-setting-actions">
+        <button
+          type="button"
+          class="confirm-modal-btn"
+          data-conference-setting-cancel
+        >
+          Cancel
+        </button>
+        <button type="submit" class="confirm-modal-btn conference-submit-btn">
+          Save
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="confirm-modal" id="conference-delete-confirm-modal" hidden>
+  <div class="confirm-modal-backdrop" data-conference-delete-modal-close></div>
+  <div
+    class="confirm-modal-card"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="conference-delete-confirm-title"
+    aria-describedby="conference-delete-confirm-message"
+  >
+    <h4 id="conference-delete-confirm-title" class="confirm-modal-title">
+      Confirm Delete
+    </h4>
+    <p id="conference-delete-confirm-message" class="confirm-modal-message">
+      Are you sure you want to delete this conference?
+    </p>
+    <div class="confirm-modal-actions">
+      <button
+        type="button"
+        class="confirm-modal-btn"
+        data-conference-delete-cancel
+      >
+        Cancel
+      </button>
+      <button
+        type="button"
+        class="confirm-modal-btn danger"
+        data-conference-delete-confirm
+      >
+        Delete
+      </button>
+    </div>
+  </div>
+</div>

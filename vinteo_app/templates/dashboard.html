@@ -7,7 +7,15 @@
     <title>Vinteo RMX Manager</title>
     <link
       rel="stylesheet"
-      href="{% static 'css/dashboard.css' %}?v=20260316-20"
+      href="{% static 'css/dashboard.css' %}?v=20260319-12"
+    />
+    <link
+      rel="stylesheet"
+      href="{% static 'css/conference.css' %}?v=20260318-1"
+    />
+    <link
+      rel="stylesheet"
+      href="{% static 'css/participant.css' %}?v=20260319-8"
     />
   </head>
   <body>
@@ -19,109 +27,22 @@
             <div>
               <div class="brand-title">Vinteo RMX Manager</div>
               <div class="brand-subtitle">
-                Multipoint Control Dashboard · Administrative Console
+                Multipoint Control Dashboard - Administrative Console
               </div>
             </div>
           </div>
           <div class="header-meta">
             <div>Operator: admin</div>
-            <div>System Time: <span id="system-time-value">10-Mar-2026 09:42</span></div>
+            <div>
+              System Time: <span id="system-time-value">10-Mar-2026 09:42</span>
+            </div>
             <div>Domain: Vinteo Core Cluster</div>
           </div>
         </div>
       </header>
 
       <div class="workspace">
-        <aside class="sidebar">
-          <section class="nav-panel">
-            <div class="panel-caption">Conference List</div>
-            <div class="conference-toolbar">
-              <span class="control-btn">All</span>
-              <span class="control-btn">Active</span>
-              <span class="control-btn">Scheduled</span>
-            </div>
-            <ul class="conference-list">
-              <li class="conference-item active">
-                <div class="conference-title">Executive Weekly Review</div>
-                <div class="conference-meta">
-                  <span>42 participants</span>
-                  <span>09:00 - 10:30</span>
-                </div>
-                <div class="conference-actions">
-                  <span class="control-btn">Join</span>
-                  <span class="control-btn">Manage</span>
-                </div>
-              </li>
-              <li class="conference-item">
-                <div class="conference-title">Townhall Overflow</div>
-                <div class="conference-meta">
-                  <span>77 participants</span>
-                  <span>Live now</span>
-                </div>
-                <div class="conference-actions">
-                  <span class="control-btn">Join</span>
-                  <span class="control-btn">Lock</span>
-                </div>
-              </li>
-              <li class="conference-item">
-                <div class="conference-title">APAC Sales Coordination</div>
-                <div class="conference-meta">
-                  <span>18 participants</span>
-                  <span>10:45 - 11:30</span>
-                </div>
-                <div class="conference-actions">
-                  <span class="control-btn">Invite</span>
-                  <span class="control-btn">Manage</span>
-                </div>
-              </li>
-              <li class="conference-item">
-                <div class="conference-title">Support War Room</div>
-                <div class="conference-meta">
-                  <span>29 participants</span>
-                  <span>Standby</span>
-                </div>
-                <div class="conference-actions">
-                  <span class="control-btn">Start</span>
-                  <span class="control-btn">Edit</span>
-                </div>
-              </li>
-              <li class="conference-item">
-                <div class="conference-title">Support War Room</div>
-                <div class="conference-meta">
-                  <span>29 participants</span>
-                  <span>Standby</span>
-                </div>
-                <div class="conference-actions">
-                  <span class="control-btn">Start</span>
-                  <span class="control-btn">Edit</span>
-                </div>
-              </li>
-              <li class="conference-item">
-                <div class="conference-title">Support War Room</div>
-                <div class="conference-meta">
-                  <span>29 participants</span>
-                  <span>Standby</span>
-                </div>
-                <div class="conference-actions">
-                  <span class="control-btn">Start</span>
-                  <span class="control-btn">Edit</span>
-                </div>
-              </li>
-              <li class="conference-item">
-                <div class="conference-title">Support War Room</div>
-                <div class="conference-meta">
-                  <span>29 participants</span>
-                  <span>Standby</span>
-                </div>
-                <div class="conference-actions">
-                  <span class="control-btn">Start</span>
-                  <span class="control-btn">Edit</span>
-                </div>
-              </li>
-            </ul>
-          </section>
-        </aside>
-
+        {% include "conference/conference_sidebar.html" %}
         <main class="content">
           <section class="content-panel">
             <div class="panel-body">
@@ -244,15 +165,29 @@
                       <div class="address-tree" role="tree">
                         <details class="address-group" open>
                           <summary class="address-node group">
-                            <span class="address-caret" aria-hidden="true"></span>
-                            <span class="address-folder" aria-hidden="true"></span>
-                            <span class="address-label">Vinteo Core Cluster</span>
+                            <span
+                              class="address-caret"
+                              aria-hidden="true"
+                            ></span>
+                            <span
+                              class="address-folder"
+                              aria-hidden="true"
+                            ></span>
+                            <span class="address-label"
+                              >Vinteo Core Cluster</span
+                            >
                           </summary>
                           <div class="address-children">
                             <details class="address-group" open>
                               <summary class="address-node group">
-                                <span class="address-caret" aria-hidden="true"></span>
-                                <span class="address-folder" aria-hidden="true"></span>
+                                <span
+                                  class="address-caret"
+                                  aria-hidden="true"
+                                ></span>
+                                <span
+                                  class="address-folder"
+                                  aria-hidden="true"
+                                ></span>
                                 <span class="address-label">Management</span>
                               </summary>
                               <ul class="address-list">
@@ -279,17 +214,21 @@
                                     class="address-file"
                                     aria-hidden="true"
                                   ></span>
-                                  <span class="address-label"
-                                    >Le Thu Ha</span
-                                  >
+                                  <span class="address-label">Le Thu Ha</span>
                                 </li>
                               </ul>
                             </details>
 
                             <details class="address-group" open>
                               <summary class="address-node group">
-                                <span class="address-caret" aria-hidden="true"></span>
-                                <span class="address-folder" aria-hidden="true"></span>
+                                <span
+                                  class="address-caret"
+                                  aria-hidden="true"
+                                ></span>
+                                <span
+                                  class="address-folder"
+                                  aria-hidden="true"
+                                ></span>
                                 <span class="address-label">Operations</span>
                               </summary>
                               <ul class="address-list">
@@ -307,9 +246,7 @@
                                     class="address-file"
                                     aria-hidden="true"
                                   ></span>
-                                  <span class="address-label"
-                                    >Vo Duc Nam</span
-                                  >
+                                  <span class="address-label">Vo Duc Nam</span>
                                 </li>
                               </ul>
                             </details>
@@ -318,44 +255,60 @@
 
                         <details class="address-group" open>
                           <summary class="address-node group">
-                            <span class="address-caret" aria-hidden="true"></span>
-                            <span class="address-folder" aria-hidden="true"></span>
+                            <span
+                              class="address-caret"
+                              aria-hidden="true"
+                            ></span>
+                            <span
+                              class="address-folder"
+                              aria-hidden="true"
+                            ></span>
                             <span class="address-label">APAC Sales</span>
                           </summary>
                           <ul class="address-list">
                             <li class="address-node participant">
-                              <span class="address-file" aria-hidden="true"></span>
-                              <span class="address-label"
-                                >Hoang Kim Ngan</span
-                              >
+                              <span
+                                class="address-file"
+                                aria-hidden="true"
+                              ></span>
+                              <span class="address-label">Hoang Kim Ngan</span>
                             </li>
                             <li class="address-node participant">
-                              <span class="address-file" aria-hidden="true"></span>
-                              <span class="address-label"
-                                >Bui Anh Tuan</span
-                              >
+                              <span
+                                class="address-file"
+                                aria-hidden="true"
+                              ></span>
+                              <span class="address-label">Bui Anh Tuan</span>
                             </li>
                           </ul>
                         </details>
 
                         <details class="address-group">
                           <summary class="address-node group">
-                            <span class="address-caret" aria-hidden="true"></span>
-                            <span class="address-folder" aria-hidden="true"></span>
+                            <span
+                              class="address-caret"
+                              aria-hidden="true"
+                            ></span>
+                            <span
+                              class="address-folder"
+                              aria-hidden="true"
+                            ></span>
                             <span class="address-label">External Partners</span>
                           </summary>
                           <ul class="address-list">
                             <li class="address-node participant">
-                              <span class="address-file" aria-hidden="true"></span>
-                              <span class="address-label"
-                                >Partner Site 01</span
-                              >
+                              <span
+                                class="address-file"
+                                aria-hidden="true"
+                              ></span>
+                              <span class="address-label">Partner Site 01</span>
                             </li>
                             <li class="address-node participant">
-                              <span class="address-file" aria-hidden="true"></span>
-                              <span class="address-label"
-                                >Partner Site 02</span
-                              >
+                              <span
+                                class="address-file"
+                                aria-hidden="true"
+                              ></span>
+                              <span class="address-label">Partner Site 02</span>
                             </li>
                           </ul>
                         </details>
@@ -411,367 +364,14 @@
                   </section>
                 </div>
 
-                <div class="active-conferences-wide">
-                  <div class="section-title-row">
-                    <h3 class="section-title">Participant List</h3>
-                    <button
-                      type="button"
-                      class="panel-mic-btn mic-all"
-                      title="Mute all participants"
-                      aria-pressed="false"
-                    >
-                      <svg
-                        class="icon-unmuted"
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
-                      >
-                        <path
-                          d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zm-5 8a1 1 0 0 1 1 1 4 4 0 0 0 8 0 1 1 0 1 1 2 0 6 6 0 0 1-5 5.91V21h2a1 1 0 1 1 0 2H9a1 1 0 1 1 0-2h2v-3.09A6 6 0 0 1 6 12a1 1 0 0 1 1-1z"
-                        />
-                      </svg>
-                      <svg
-                        class="icon-muted"
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
-                      >
-                        <path
-                          d="M6.71 5.29a1 1 0 0 0-1.42 1.42l4.01 4.01V12a3 3 0 1 0 6 0V9.41l2 2V12a6 6 0 0 1-5 5.91V21h2a1 1 0 1 1 0 2H9a1 1 0 1 1 0-2h2v-3.09A6 6 0 0 1 6 12a1 1 0 0 1 2 0 4 4 0 0 0 1.84 3.37L6.71 5.29zM12 3a3 3 0 0 0-3 3v1.59l6 6V6a3 3 0 0 0-3-3zm8.71 16.29a1 1 0 0 1-1.42 1.42l-14-14a1 1 0 1 1 1.42-1.42l14 14z"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                  <div class="active-conferences-scroll">
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>MCU</th>
-                          <th>Name</th>
-                          <th>Status</th>
-                          <th>Role</th>
-                          <th>IP Address</th>
-                          <th>SIP</th>
-                          <th>Network</th>
-                          <th>Dialing Direction</th>
-                          <th class="media-sort-head">
-                            <div class="media-sort-head-inner">
-                              <span>Audio</span>
-                              <button
-                                type="button"
-                                class="media-sort-btn"
-                                data-sort-media="audio"
-                                data-sort-direction="off-first"
-                                title="Sort by audio status"
-                                aria-label="Sort by audio status"
-                              >
-                                <svg viewBox="0 0 24 24" aria-hidden="true">
-                                  <path
-                                    d="M7 4h10a1 1 0 1 1 0 2H7a1 1 0 1 1 0-2zm2.71 6.29a1 1 0 0 1 1.42 0L12 11.17l.87-.88a1 1 0 1 1 1.42 1.42l-1.58 1.58a1 1 0 0 1-1.42 0L9.71 11.7a1 1 0 0 1 0-1.41zM7 18h10a1 1 0 1 1 0 2H7a1 1 0 1 1 0-2z"
-                                  />
-                                </svg>
-                              </button>
-                            </div>
-                          </th>
-                          <th class="media-sort-head">
-                            <div class="media-sort-head-inner">
-                              <span>Video</span>
-                              <button
-                                type="button"
-                                class="media-sort-btn"
-                                data-sort-media="video"
-                                data-sort-direction="off-first"
-                                title="Sort by video status"
-                                aria-label="Sort by video status"
-                              >
-                                <svg viewBox="0 0 24 24" aria-hidden="true">
-                                  <path
-                                    d="M7 4h10a1 1 0 1 1 0 2H7a1 1 0 1 1 0-2zm2.71 6.29a1 1 0 0 1 1.42 0L12 11.17l.87-.88a1 1 0 1 1 1.42 1.42l-1.58 1.58a1 1 0 0 1-1.42 0L9.71 11.7a1 1 0 0 1 0-1.41zM7 18h10a1 1 0 1 1 0 2H7a1 1 0 1 1 0-2z"
-                                  />
-                                </svg>
-                              </button>
-                            </div>
-                          </th>
-                          <th>FECC Token</th>
-                          <th>Content Token</th>
-                          <th>ID</th>
-                          <th class="kick-col">Kick</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td>RMX-01</td>
-                          <td>Nguyen Minh Anh</td>
-                          <td class="state ok">Connected</td>
-                          <td>Host</td>
-                          <td>10.20.1.15</td>
-                          <td>1001@vinteo.local</td>
-                          <td>LAN-A</td>
-                          <td>Inbound</td>
-                          <td class="media-cell-col">
-                            <div class="media-cell">
-                              <span class="media-state">On</span>
-                              <button
-                                type="button"
-                                class="media-toggle audio is-on"
-                                data-media="audio"
-                                data-on-label="On"
-                                data-off-label="Off"
-                                aria-pressed="true"
-                                title="Turn off audio"
-                              >
-                                <svg viewBox="0 0 24 24" aria-hidden="true">
-                                  <path
-                                    d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zm-5 8a1 1 0 0 1 1 1 4 4 0 0 0 8 0 1 1 0 1 1 2 0 6 6 0 0 1-5 5.91V21h2a1 1 0 1 1 0 2H9a1 1 0 1 1 0-2h2v-3.09A6 6 0 0 1 6 12a1 1 0 0 1 1-1z"
-                                  />
-                                </svg>
-                              </button>
-                            </div>
-                          </td>
-                          <td class="media-cell-col">
-                            <div class="media-cell">
-                              <span class="media-state">On</span>
-                              <button
-                                type="button"
-                                class="media-toggle video is-on"
-                                data-media="video"
-                                data-on-label="On"
-                                data-off-label="Off"
-                                aria-pressed="true"
-                                title="Turn off video"
-                              >
-                                <svg viewBox="0 0 24 24" aria-hidden="true">
-                                  <path
-                                    d="M17 10.5V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3.5l4 4V6.5l-4 4z"
-                                  />
-                                </svg>
-                              </button>
-                            </div>
-                          </td>
-                          <td>Yes</td>
-                          <td>Yes</td>
-                          <td>U-001</td>
-                        </tr>
-                        <tr>
-                          <td>RMX-01</td>
-                          <td>Tran Gia Bao</td>
-                          <td class="state ok">Connected</td>
-                          <td>Presenter</td>
-                          <td>10.20.1.18</td>
-                          <td>1002@vinteo.local</td>
-                          <td>LAN-A</td>
-                          <td>Outbound</td>
-                          <td class="media-cell-col">
-                            <div class="media-cell">
-                              <span class="media-state">On</span>
-                              <button
-                                type="button"
-                                class="media-toggle audio is-on"
-                                data-media="audio"
-                                data-on-label="On"
-                                data-off-label="Off"
-                                aria-pressed="true"
-                                title="Turn off audio"
-                              >
-                                <svg viewBox="0 0 24 24" aria-hidden="true">
-                                  <path
-                                    d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zm-5 8a1 1 0 0 1 1 1 4 4 0 0 0 8 0 1 1 0 1 1 2 0 6 6 0 0 1-5 5.91V21h2a1 1 0 1 1 0 2H9a1 1 0 1 1 0-2h2v-3.09A6 6 0 0 1 6 12a1 1 0 0 1 1-1z"
-                                  />
-                                </svg>
-                              </button>
-                            </div>
-                          </td>
-                          <td class="media-cell-col">
-                            <div class="media-cell">
-                              <span class="media-state">On</span>
-                              <button
-                                type="button"
-                                class="media-toggle video is-on"
-                                data-media="video"
-                                data-on-label="On"
-                                data-off-label="Off"
-                                aria-pressed="true"
-                                title="Turn off video"
-                              >
-                                <svg viewBox="0 0 24 24" aria-hidden="true">
-                                  <path
-                                    d="M17 10.5V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3.5l4 4V6.5l-4 4z"
-                                  />
-                                </svg>
-                              </button>
-                            </div>
-                          </td>
-                          <td>No</td>
-                          <td>Yes</td>
-                          <td>U-002</td>
-                        </tr>
-                        <tr>
-                          <td>RMX-02</td>
-                          <td>Le Thu Ha</td>
-                          <td class="state ok">Connected</td>
-                          <td>Moderator</td>
-                          <td>10.20.2.22</td>
-                          <td>1003@vinteo.local</td>
-                          <td>WAN-1</td>
-                          <td>Inbound</td>
-                          <td class="media-cell-col">
-                            <div class="media-cell">
-                              <span class="media-state">On</span>
-                              <button
-                                type="button"
-                                class="media-toggle audio is-on"
-                                data-media="audio"
-                                data-on-label="On"
-                                data-off-label="Off"
-                                aria-pressed="true"
-                                title="Turn off audio"
-                              >
-                                <svg viewBox="0 0 24 24" aria-hidden="true">
-                                  <path
-                                    d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zm-5 8a1 1 0 0 1 1 1 4 4 0 0 0 8 0 1 1 0 1 1 2 0 6 6 0 0 1-5 5.91V21h2a1 1 0 1 1 0 2H9a1 1 0 1 1 0-2h2v-3.09A6 6 0 0 1 6 12a1 1 0 0 1 1-1z"
-                                  />
-                                </svg>
-                              </button>
-                            </div>
-                          </td>
-                          <td class="media-cell-col">
-                            <div class="media-cell">
-                              <span class="media-state">Off</span>
-                              <button
-                                type="button"
-                                class="media-toggle video is-off"
-                                data-media="video"
-                                data-on-label="On"
-                                data-off-label="Off"
-                                aria-pressed="false"
-                                title="Turn on video"
-                              >
-                                <svg viewBox="0 0 24 24" aria-hidden="true">
-                                  <path
-                                    d="M17 10.5V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3.5l4 4V6.5l-4 4z"
-                                  />
-                                </svg>
-                              </button>
-                            </div>
-                          </td>
-                          <td>No</td>
-                          <td>No</td>
-                          <td>U-003</td>
-                        </tr>
-                        <tr>
-                          <td>RMX-02</td>
-                          <td>Pham Quoc Dat</td>
-                          <td class="state warn">Standby</td>
-                          <td>Guest</td>
-                          <td>10.20.2.31</td>
-                          <td>1004@vinteo.local</td>
-                          <td>WAN-1</td>
-                          <td>Outbound</td>
-                          <td class="media-cell-col">
-                            <div class="media-cell">
-                              <span class="media-state">Off</span>
-                              <button
-                                type="button"
-                                class="media-toggle audio is-off"
-                                data-media="audio"
-                                data-on-label="On"
-                                data-off-label="Off"
-                                aria-pressed="false"
-                                title="Turn on audio"
-                              >
-                                <svg viewBox="0 0 24 24" aria-hidden="true">
-                                  <path
-                                    d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zm-5 8a1 1 0 0 1 1 1 4 4 0 0 0 8 0 1 1 0 1 1 2 0 6 6 0 0 1-5 5.91V21h2a1 1 0 1 1 0 2H9a1 1 0 1 1 0-2h2v-3.09A6 6 0 0 1 6 12a1 1 0 0 1 1-1z"
-                                  />
-                                </svg>
-                              </button>
-                            </div>
-                          </td>
-                          <td class="media-cell-col">
-                            <div class="media-cell">
-                              <span class="media-state">On</span>
-                              <button
-                                type="button"
-                                class="media-toggle video is-on"
-                                data-media="video"
-                                data-on-label="On"
-                                data-off-label="Off"
-                                aria-pressed="true"
-                                title="Turn off video"
-                              >
-                                <svg viewBox="0 0 24 24" aria-hidden="true">
-                                  <path
-                                    d="M17 10.5V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3.5l4 4V6.5l-4 4z"
-                                  />
-                                </svg>
-                              </button>
-                            </div>
-                          </td>
-                          <td>No</td>
-                          <td>No</td>
-                          <td>U-004</td>
-                        </tr>
-                        <tr>
-                          <td>RMX-03</td>
-                          <td>Hoang Kim Ngan</td>
-                          <td class="state warn">Scheduling</td>
-                          <td>Guest</td>
-                          <td>10.20.3.19</td>
-                          <td>1005@vinteo.local</td>
-                          <td>VPN</td>
-                          <td>Inbound</td>
-                          <td class="media-cell-col">
-                            <div class="media-cell">
-                              <span class="media-state">On</span>
-                              <button
-                                type="button"
-                                class="media-toggle audio is-on"
-                                data-media="audio"
-                                data-on-label="On"
-                                data-off-label="Off"
-                                aria-pressed="true"
-                                title="Turn off audio"
-                              >
-                                <svg viewBox="0 0 24 24" aria-hidden="true">
-                                  <path
-                                    d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zm-5 8a1 1 0 0 1 1 1 4 4 0 0 0 8 0 1 1 0 1 1 2 0 6 6 0 0 1-5 5.91V21h2a1 1 0 1 1 0 2H9a1 1 0 1 1 0-2h2v-3.09A6 6 0 0 1 6 12a1 1 0 0 1 1-1z"
-                                  />
-                                </svg>
-                              </button>
-                            </div>
-                          </td>
-                          <td class="media-cell-col">
-                            <div class="media-cell">
-                              <span class="media-state">Off</span>
-                              <button
-                                type="button"
-                                class="media-toggle video is-off"
-                                data-media="video"
-                                data-on-label="On"
-                                data-off-label="Off"
-                                aria-pressed="false"
-                                title="Turn on video"
-                              >
-                                <svg viewBox="0 0 24 24" aria-hidden="true">
-                                  <path
-                                    d="M17 10.5V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3.5l4 4V6.5l-4 4z"
-                                  />
-                                </svg>
-                              </button>
-                            </div>
-                          </td>
-                          <td>No</td>
-                          <td>No</td>
-                          <td>U-005</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
+                {% include "participant/participant_list.html" %}
               </div>
             </div>
           </section>
         </main>
       </div>
     </div>
+    {% include "conference/conference_modals.html" %}
     <div class="confirm-modal" id="kick-confirm-modal" hidden>
       <div class="confirm-modal-backdrop" data-kick-modal-close></div>
       <div
@@ -788,11 +388,7 @@
           Are you sure you want to kick this participant out of this meeting?
         </p>
         <div class="confirm-modal-actions">
-          <button
-            type="button"
-            class="confirm-modal-btn"
-            data-kick-cancel
-          >
+          <button type="button" class="confirm-modal-btn" data-kick-cancel>
             Cancel
           </button>
           <button
@@ -821,11 +417,7 @@
           Are you sure you want to leave this meeting?
         </p>
         <div class="confirm-modal-actions">
-          <button
-            type="button"
-            class="confirm-modal-btn"
-            data-leave-cancel
-          >
+          <button type="button" class="confirm-modal-btn" data-leave-cancel>
             Cancel
           </button>
           <button
@@ -838,6 +430,7 @@
         </div>
       </div>
     </div>
+
     <div class="confirm-modal" id="address-participant-modal" hidden>
       <div class="confirm-modal-backdrop" data-address-modal-close></div>
       <div
@@ -956,9 +549,15 @@
         </form>
       </div>
     </div>
-    <script src="{% static 'js/layout-manager.js' %}?v=20260316-1"></script>
-    <script src="{% static 'js/popup-manager.js' %}?v=20260316-1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+    <script src="{% static 'js/api-axios.js' %}?v=20260318-1"></script>
+    <script src="{% static 'js/layout-manager.js' %}?v=20260319-15"></script>
+    <script src="{% static 'js/popup-manager.js' %}?v=20260319-1"></script>
     <script src="{% static 'js/address-book-manager.js' %}?v=20260316-2"></script>
+    <script src="{% static 'js/conference/conference-manager.js' %}?v=20260319-3"></script>
+    <script src="{% static 'js/participant/participant-manager.js' %}?v=20260319-12"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.18/dist/hls.min.js"></script>
+    <script src="{% static 'js/stage-stream-manager.js' %}?v=20260319-13"></script>
     <script>
       (function () {
         function setParticipantMediaState(button, shouldBeOn) {
@@ -983,89 +582,1280 @@
           }
         }
 
-        function syncMuteAllButtonState() {
-          const muteAllButton = document.querySelector(
-            ".panel-mic-btn.mic-all",
+        function getVinteoApiClient() {
+          return window.DashboardAxios && window.DashboardAxios.vinteo
+            ? window.DashboardAxios.vinteo
+            : null;
+        }
+
+        function extractRequestErrorMessage(error) {
+          if (
+            error &&
+            error.response &&
+            error.response.data &&
+            typeof error.response.data === "object"
+          ) {
+            const message =
+              error.response.data.message ||
+              error.response.data.error ||
+              error.response.data.status;
+            if (typeof message === "string" && message.trim()) {
+              return message.trim();
+            }
+          }
+
+          if (
+            error &&
+            typeof error.message === "string" &&
+            error.message.trim()
+          ) {
+            return error.message.trim();
+          }
+
+          return "Request failed.";
+        }
+
+        function getActiveConferenceNumber() {
+          const activeConferenceItem = document.querySelector(
+            ".conference-item.active",
           );
-          const audioButtons = Array.from(
-            document.querySelectorAll(".media-toggle.audio"),
+          if (!activeConferenceItem) {
+            return "";
+          }
+          return String(activeConferenceItem.dataset.number || "").trim();
+        }
+
+        function getParticipantNumberFromButton(button) {
+          const row = button ? button.closest("tr") : null;
+          if (!row) {
+            return "";
+          }
+
+          return String(
+            row.dataset.participantNumber || row.dataset.participantId || "",
+          ).trim();
+        }
+
+        function getParticipantNumberFromRow(row) {
+          if (!row) {
+            return "";
+          }
+          return String(
+            row.dataset.participantNumber || row.dataset.participantId || "",
+          ).trim();
+        }
+
+        function getParticipantDisplayNameFromRow(row) {
+          const nameCell = row && row.children ? row.children[1] : null;
+          return nameCell ? String(nameCell.textContent || "").trim() : "";
+        }
+
+        function isParticipantRowDisconnected(row) {
+          if (!row || row.classList.contains("participant-empty-row")) {
+            return true;
+          }
+
+          const statusCell = row.children && row.children[2] ? row.children[2] : null;
+          const statusText = String(
+            (statusCell && statusCell.textContent) || "",
+          ).trim().toLowerCase();
+
+          if (statusText.includes("disconnect")) {
+            return true;
+          }
+
+          if (statusCell && statusCell.classList.contains("crit")) {
+            return true;
+          }
+
+          return false;
+        }
+
+        function findRenderedParticipantRowByNumber(participantNumber) {
+          const normalized = String(participantNumber || "").trim();
+          if (!normalized) {
+            return null;
+          }
+
+          const rows = Array.from(
+            document.querySelectorAll(".active-conferences-scroll tbody tr"),
+          ).filter(function (row) {
+            return !row.classList.contains("participant-empty-row");
+          });
+
+          return (
+            rows.find(function (row) {
+              return getParticipantNumberFromRow(row) === normalized;
+            }) || null
+          );
+        }
+
+        function findRenderedMediaButton(participantNumber, mediaType) {
+          const row = findRenderedParticipantRowByNumber(participantNumber);
+          if (!row) {
+            return null;
+          }
+          return row.querySelector(".media-toggle." + mediaType);
+        }
+
+        let cachedKickConfirmPopup = null;
+        let kickConfirmPopupInitialized = false;
+
+        function getKickConfirmPopup() {
+          if (kickConfirmPopupInitialized) {
+            return cachedKickConfirmPopup;
+          }
+
+          kickConfirmPopupInitialized = true;
+          const popupManager = window.DashboardPopupManager;
+          if (
+            popupManager &&
+            typeof popupManager.createConfirmPopup === "function"
+          ) {
+            cachedKickConfirmPopup = popupManager.createConfirmPopup({
+              modalId: "kick-confirm-modal",
+              messageSelector: "#kick-confirm-message",
+              confirmSelector: "[data-kick-confirm]",
+              cancelSelector: "[data-kick-cancel]",
+              closeSelector: "[data-kick-modal-close]",
+            });
+          }
+
+          return cachedKickConfirmPopup;
+        }
+
+        async function requestAudioStateChange(
+          conferenceNumber,
+          participants,
+          shouldEnable,
+        ) {
+          const apiClient = getVinteoApiClient();
+          if (!apiClient) {
+            throw new Error("API client is not ready.");
+          }
+
+          const normalizedConference = String(conferenceNumber || "").trim();
+          const normalizedParticipants = Array.from(
+            new Set(
+              (Array.isArray(participants) ? participants : [])
+                .map(function (value) {
+                  return String(value || "").trim();
+                })
+                .filter(Boolean),
+            ),
           );
 
-          if (!muteAllButton) return;
+          if (!normalizedConference) {
+            throw new Error("Conference is not selected.");
+          }
+          if (!normalizedParticipants.length) {
+            throw new Error("Participant is not selected.");
+          }
 
-          if (audioButtons.length === 0) {
-            muteAllButton.classList.remove("is-muted");
-            muteAllButton.setAttribute("aria-pressed", "false");
-            muteAllButton.title = "Mute all participants";
+          await apiClient.post(
+            shouldEnable ? "/api/v1/enable_audio" : "/api/v1/disable_audio",
+            {
+              conference: normalizedConference,
+              participants: normalizedParticipants,
+            },
+          );
+        }
+
+        async function requestCameraStateChange(
+          conferenceNumber,
+          participants,
+          shouldEnable,
+        ) {
+          const apiClient = getVinteoApiClient();
+          if (!apiClient) {
+            throw new Error("API client is not ready.");
+          }
+
+          const normalizedConference = String(conferenceNumber || "").trim();
+          const normalizedParticipants = Array.from(
+            new Set(
+              (Array.isArray(participants) ? participants : [])
+                .map(function (value) {
+                  return String(value || "").trim();
+                })
+                .filter(Boolean),
+            ),
+          );
+
+          if (!normalizedConference) {
+            throw new Error("Conference is not selected.");
+          }
+          if (!normalizedParticipants.length) {
+            throw new Error("Participant is not selected.");
+          }
+
+          await apiClient.post(
+            shouldEnable ? "/api/v1/enable_camera" : "/api/v1/disable_camera",
+            {
+              conference: normalizedConference,
+              participants: normalizedParticipants,
+            },
+          );
+        }
+
+        async function requestMicStateChange(
+          conferenceNumber,
+          participants,
+          shouldEnable,
+        ) {
+          const apiClient = getVinteoApiClient();
+          if (!apiClient) {
+            throw new Error("API client is not ready.");
+          }
+
+          const normalizedConference = String(conferenceNumber || "").trim();
+          const normalizedParticipants = Array.from(
+            new Set(
+              (Array.isArray(participants) ? participants : [])
+                .map(function (value) {
+                  return String(value || "").trim();
+                })
+                .filter(Boolean),
+            ),
+          );
+
+          if (!normalizedConference) {
+            throw new Error("Conference is not selected.");
+          }
+          if (!normalizedParticipants.length) {
+            throw new Error("Participant is not selected.");
+          }
+
+          const payload = {
+            conference: normalizedConference,
+            participants: normalizedParticipants,
+          };
+
+          if (!shouldEnable) {
+            payload.notLecturer = false;
+          }
+
+          await apiClient.post(
+            shouldEnable ? "/api/v1/enable_mic" : "/api/v1/disable_mic",
+            payload,
+          );
+        }
+
+        async function requestVideoStateChange(
+          conferenceNumber,
+          participants,
+          shouldEnable,
+        ) {
+          const apiClient = getVinteoApiClient();
+          if (!apiClient) {
+            throw new Error("API client is not ready.");
+          }
+
+          const normalizedConference = String(conferenceNumber || "").trim();
+          const normalizedParticipants = Array.from(
+            new Set(
+              (Array.isArray(participants) ? participants : [])
+                .map(function (value) {
+                  return String(value || "").trim();
+                })
+                .filter(Boolean),
+            ),
+          );
+
+          if (!normalizedConference) {
+            throw new Error("Conference is not selected.");
+          }
+          if (!normalizedParticipants.length) {
+            throw new Error("Participant is not selected.");
+          }
+
+          await apiClient.post(
+            shouldEnable ? "/api/v1/enable_video" : "/api/v1/disable_video",
+            {
+              conference: normalizedConference,
+              participants: normalizedParticipants,
+            },
+          );
+        }
+
+        async function requestDeleteParticipant(
+          conferenceNumber,
+          participantNumber,
+        ) {
+          const apiClient = getVinteoApiClient();
+          if (!apiClient) {
+            throw new Error("API client is not ready.");
+          }
+
+          const normalizedConference = String(conferenceNumber || "").trim();
+          const normalizedParticipant = String(participantNumber || "").trim();
+
+          if (!normalizedConference) {
+            throw new Error("Conference is not selected.");
+          }
+          if (!normalizedParticipant) {
+            throw new Error("Participant is not selected.");
+          }
+
+          await apiClient.post("/api/v1/disconnect", {
+            conference: normalizedConference,
+            participants: [normalizedParticipant],
+          });
+        }
+
+        function collectParticipantIdentifiers(row) {
+          if (!row) {
+            return [];
+          }
+
+          const idCell =
+            row.children && row.children[0] ? row.children[0] : null;
+          const idCellTitle = idCell
+            ? String(idCell.getAttribute("title") || "").trim()
+            : "";
+          const idCellText = idCell
+            ? String(idCell.textContent || "").trim()
+            : "";
+          const candidateValues = [
+            getParticipantNumberFromRow(row),
+            String(row.dataset.participantId || "").trim(),
+            idCellTitle,
+            idCellText,
+          ];
+
+          return Array.from(
+            new Set(
+              candidateValues.filter(function (value) {
+                return Boolean(value);
+              }),
+            ),
+          );
+        }
+
+        function removeParticipantVisualsByName(participantName) {
+          const normalizedName = String(participantName || "")
+            .trim()
+            .toLowerCase();
+          if (!normalizedName || normalizedName === "no participant") {
             return;
           }
 
-          const allMuted = audioButtons.every(function (button) {
+          const tiles = Array.from(
+            document.querySelectorAll(
+              ".zoom-grid .zoom-tile:not(.zoom-overlay-tile)",
+            ),
+          );
+
+          tiles.forEach(function (tile) {
+            const siteName = String(tile.dataset.siteName || "")
+              .trim()
+              .toLowerCase();
+            if (siteName !== normalizedName) {
+              return;
+            }
+            tile.dataset.siteName = "No Participant";
+            const label = tile.querySelector(".zoom-label");
+            if (label) {
+              label.textContent = "No Participant";
+            }
+            tile.classList.remove("is-presentation");
+          });
+        }
+
+        async function executeKickParticipantRow(row) {
+          if (!row || row.classList.contains("participant-empty-row")) {
+            return false;
+          }
+
+          const participantNumber = getParticipantNumberFromRow(row);
+          const currentRow =
+            findRenderedParticipantRowByNumber(participantNumber) || row;
+
+          if (
+            !currentRow ||
+            currentRow.classList.contains("participant-empty-row")
+          ) {
+            return false;
+          }
+
+          if (currentRow.dataset.kickBusy === "1") {
+            return false;
+          }
+
+          const conferenceNumber = getActiveConferenceNumber();
+          const participantName = getParticipantDisplayNameFromRow(currentRow);
+          const kickButton = currentRow.querySelector(".kick-btn");
+          const participantIdentifiers =
+            collectParticipantIdentifiers(currentRow);
+
+          currentRow.dataset.kickBusy = "1";
+          if (kickButton) {
+            kickButton.disabled = true;
+          }
+
+          try {
+            let disconnectError = null;
+            let disconnected = false;
+
+            for (
+              let index = 0;
+              index < participantIdentifiers.length;
+              index += 1
+            ) {
+              const candidate = participantIdentifiers[index];
+              try {
+                await requestDeleteParticipant(conferenceNumber, candidate);
+                disconnected = true;
+                break;
+              } catch (error) {
+                disconnectError = error;
+              }
+            }
+
+            if (!disconnected) {
+              throw disconnectError || new Error("Participant does not exist.");
+            }
+
+            currentRow.remove();
+            removeParticipantVisualsByName(participantName);
+            syncMuteAllButtonState();
+            return true;
+          } catch (error) {
+            window.alert(
+              "Cannot remove participant: " + extractRequestErrorMessage(error),
+            );
+            return false;
+          } finally {
+            currentRow.dataset.kickBusy = "0";
+            if (kickButton) {
+              kickButton.disabled = false;
+            }
+          }
+        }
+
+        function triggerKickWithConfirmation(row) {
+          if (!row || row.classList.contains("participant-empty-row")) {
+            return;
+          }
+
+          const participantNumber = getParticipantNumberFromRow(row);
+          const currentRow =
+            findRenderedParticipantRowByNumber(participantNumber) || row;
+          const memberName =
+            getParticipantDisplayNameFromRow(currentRow) || "participant";
+          const message =
+            "Are you sure you want to kick " +
+            memberName +
+            " out of this meeting?";
+
+          const kickPopup = getKickConfirmPopup();
+          const usedModal =
+            kickPopup &&
+            kickPopup.open({
+              message: message,
+              onConfirm: function () {
+                void executeKickParticipantRow(currentRow);
+              },
+            });
+          if (usedModal) {
+            return;
+          }
+
+          const accepted = window.confirm(message);
+          if (accepted) {
+            void executeKickParticipantRow(currentRow);
+          }
+        }
+
+        function getMediaTypeFromButton(button) {
+          if (!button) return "";
+          return String(button.dataset.media || "")
+            .trim()
+            .toLowerCase();
+        }
+
+        async function applyParticipantMediaChange(
+          button,
+          shouldBeOn,
+          options,
+        ) {
+          const optionObject =
+            options && typeof options === "object" ? options : {};
+          const optionMediaType = String(optionObject.mediaType || "")
+            .trim()
+            .toLowerCase();
+          const optionParticipantNumber = String(
+            optionObject.participantNumber || "",
+          ).trim();
+
+          const mediaType = optionMediaType || getMediaTypeFromButton(button);
+          const participantNumber =
+            optionParticipantNumber || getParticipantNumberFromButton(button);
+          const resolvedButton =
+            button || findRenderedMediaButton(participantNumber, mediaType);
+
+          if (!resolvedButton || resolvedButton.dataset.busy === "1") {
+            return false;
+          }
+
+          const conferenceNumber = getActiveConferenceNumber();
+          const shouldSyncMuteAll = [
+            "audio",
+            "video",
+            "mic",
+            "camera",
+          ].includes(mediaType);
+
+          resolvedButton.dataset.busy = "1";
+          resolvedButton.disabled = true;
+
+          try {
+            if (mediaType === "audio") {
+              await requestAudioStateChange(
+                conferenceNumber,
+                [participantNumber],
+                shouldBeOn,
+              );
+            } else if (mediaType === "camera") {
+              await requestCameraStateChange(
+                conferenceNumber,
+                [participantNumber],
+                shouldBeOn,
+              );
+            } else if (mediaType === "mic") {
+              await requestMicStateChange(
+                conferenceNumber,
+                [participantNumber],
+                shouldBeOn,
+              );
+            } else if (mediaType === "video") {
+              await requestVideoStateChange(
+                conferenceNumber,
+                [participantNumber],
+                shouldBeOn,
+              );
+            }
+
+            const currentRenderedButton = findRenderedMediaButton(
+              participantNumber,
+              mediaType,
+            );
+            if (currentRenderedButton) {
+              setParticipantMediaState(currentRenderedButton, shouldBeOn);
+            } else {
+              setParticipantMediaState(resolvedButton, shouldBeOn);
+            }
+
+            if (shouldSyncMuteAll) {
+              syncMuteAllButtonState();
+            }
+
+            return true;
+          } catch (error) {
+            let errorPrefix = "Cannot update participant media: ";
+            if (mediaType === "audio") {
+              errorPrefix = "Cannot update participant audio: ";
+            } else if (mediaType === "camera") {
+              errorPrefix = "Cannot update participant camera: ";
+            } else if (mediaType === "mic") {
+              errorPrefix = "Cannot update participant microphone: ";
+            } else if (mediaType === "video") {
+              errorPrefix = "Cannot update participant video: ";
+            }
+            window.alert(errorPrefix + extractRequestErrorMessage(error));
+            return false;
+          } finally {
+            resolvedButton.dataset.busy = "0";
+            resolvedButton.disabled = false;
+          }
+        }
+
+        function syncBulkMediaButtonState(config) {
+          const toggleButton = document.querySelector(config.buttonSelector);
+          if (!toggleButton) return;
+
+          const mediaButtons = Array.from(
+            document.querySelectorAll(".media-toggle." + config.mediaType),
+          );
+
+          if (mediaButtons.length === 0) {
+            toggleButton.classList.remove("is-muted");
+            toggleButton.setAttribute("aria-pressed", "false");
+            toggleButton.title = config.disableAllTitle;
+            return;
+          }
+
+          const allOff = mediaButtons.every(function (button) {
             return button.classList.contains("is-off");
           });
 
-          muteAllButton.classList.toggle("is-muted", allMuted);
-          muteAllButton.setAttribute("aria-pressed", String(allMuted));
-          muteAllButton.title = allMuted
-            ? "Unmute all participants"
-            : "Mute all participants";
+          toggleButton.classList.toggle("is-muted", allOff);
+          toggleButton.setAttribute("aria-pressed", String(allOff));
+          toggleButton.title = allOff
+            ? config.enableAllTitle
+            : config.disableAllTitle;
+        }
+
+        function syncMuteAllButtonState() {
+          syncBulkMediaButtonState({
+            buttonSelector: ".panel-mic-btn.mic-all",
+            mediaType: "mic",
+            disableAllTitle: "Mute all microphones",
+            enableAllTitle: "Unmute all microphones",
+          });
+          syncBulkMediaButtonState({
+            buttonSelector: ".panel-mic-btn.camera-all",
+            mediaType: "camera",
+            disableAllTitle: "Turn off all cameras",
+            enableAllTitle: "Turn on all cameras",
+          });
+          syncBulkMediaButtonState({
+            buttonSelector: ".panel-mic-btn.audio-all",
+            mediaType: "audio",
+            disableAllTitle: "Turn off all audio",
+            enableAllTitle: "Turn on all audio",
+          });
+          syncBulkMediaButtonState({
+            buttonSelector: ".panel-mic-btn.video-all",
+            mediaType: "video",
+            disableAllTitle: "Turn off all video",
+            enableAllTitle: "Turn on all video",
+          });
+        }
+
+        function collectBulkMediaTargets(mediaType, willDisableAll) {
+          const mediaButtons = Array.from(
+            document.querySelectorAll(".media-toggle." + mediaType),
+          );
+          const targetByParticipant = new Map();
+
+          mediaButtons.forEach(function (button) {
+            const row = button.closest("tr");
+            if (!row || isParticipantRowDisconnected(row)) {
+              return;
+            }
+
+            const currentOn = button.classList.contains("is-on");
+            const shouldChange = willDisableAll ? currentOn : !currentOn;
+            if (!shouldChange) {
+              return;
+            }
+
+            const participantNumber = getParticipantNumberFromButton(button);
+            if (!participantNumber) {
+              return;
+            }
+
+            if (!targetByParticipant.has(participantNumber)) {
+              targetByParticipant.set(participantNumber, []);
+            }
+            targetByParticipant.get(participantNumber).push(button);
+          });
+
+          return {
+            mediaButtons: mediaButtons,
+            targetByParticipant: targetByParticipant,
+            participantNumbers: Array.from(targetByParticipant.keys()),
+          };
+        }
+
+        function bindBulkMediaToggle(config) {
+          const toggleButton = document.querySelector(config.buttonSelector);
+          if (!toggleButton) return;
+          if (toggleButton.dataset.bulkMediaBound === "1") return;
+
+          toggleButton.dataset.bulkMediaBound = "1";
+          toggleButton.addEventListener("click", async function () {
+            if (toggleButton.dataset.busy === "1") {
+              return;
+            }
+
+            const willDisableAll = !toggleButton.classList.contains("is-muted");
+            const conferenceNumber = getActiveConferenceNumber();
+            const targets = collectBulkMediaTargets(
+              config.mediaType,
+              willDisableAll,
+            );
+
+            if (!targets.mediaButtons.length) {
+              return;
+            }
+            if (!targets.participantNumbers.length) {
+              syncMuteAllButtonState();
+              return;
+            }
+
+            toggleButton.dataset.busy = "1";
+            toggleButton.disabled = true;
+
+            try {
+              const shouldEnable = !willDisableAll;
+              let changedParticipants = new Set();
+
+              try {
+                await config.requestFn(
+                  conferenceNumber,
+                  targets.participantNumbers,
+                  shouldEnable,
+                );
+                changedParticipants = new Set(targets.participantNumbers);
+              } catch (_batchError) {
+                const singleResults = await Promise.allSettled(
+                  targets.participantNumbers.map(function (participantNumber) {
+                    return config
+                      .requestFn(
+                        conferenceNumber,
+                        [participantNumber],
+                        shouldEnable,
+                      )
+                      .then(function () {
+                        return participantNumber;
+                      });
+                  }),
+                );
+
+                singleResults.forEach(function (result) {
+                  if (result.status === "fulfilled" && result.value) {
+                    changedParticipants.add(result.value);
+                  }
+                });
+
+                if (!changedParticipants.size) {
+                  throw _batchError;
+                }
+              }
+
+              changedParticipants.forEach(function (participantNumber) {
+                const buttons =
+                  targets.targetByParticipant.get(participantNumber) || [];
+                buttons.forEach(function (button) {
+                  setParticipantMediaState(button, shouldEnable);
+                });
+              });
+              syncMuteAllButtonState();
+            } catch (error) {
+              window.alert(
+                config.errorPrefix + extractRequestErrorMessage(error),
+              );
+            } finally {
+              toggleButton.dataset.busy = "0";
+              toggleButton.disabled = false;
+            }
+          });
         }
 
         function initMicToggle() {
-          const muteAllButton = document.querySelector(
-            ".panel-mic-btn.mic-all",
-          );
-          if (!muteAllButton) return;
+          bindBulkMediaToggle({
+            buttonSelector: ".panel-mic-btn.mic-all",
+            mediaType: "mic",
+            requestFn: requestMicStateChange,
+            errorPrefix: "Cannot update participant microphone: ",
+          });
 
-          muteAllButton.addEventListener("click", function () {
-            const willMuteAll = !muteAllButton.classList.contains("is-muted");
-            const audioButtons = document.querySelectorAll(
-              ".media-toggle.audio",
-            );
+          bindBulkMediaToggle({
+            buttonSelector: ".panel-mic-btn.camera-all",
+            mediaType: "camera",
+            requestFn: requestCameraStateChange,
+            errorPrefix: "Cannot update participant camera: ",
+          });
 
-            audioButtons.forEach(function (button) {
-              setParticipantMediaState(button, !willMuteAll);
-            });
+          bindBulkMediaToggle({
+            buttonSelector: ".panel-mic-btn.audio-all",
+            mediaType: "audio",
+            requestFn: requestAudioStateChange,
+            errorPrefix: "Cannot update participant audio: ",
+          });
 
-            syncMuteAllButtonState();
+          bindBulkMediaToggle({
+            buttonSelector: ".panel-mic-btn.video-all",
+            mediaType: "video",
+            requestFn: requestVideoStateChange,
+            errorPrefix: "Cannot update participant video: ",
           });
 
           syncMuteAllButtonState();
         }
 
         function initParticipantMediaToggles() {
-          const mediaButtons = document.querySelectorAll(".media-toggle");
-          if (!mediaButtons.length) return;
+          const tableBody = document.querySelector(
+            ".active-conferences-scroll tbody",
+          );
+          if (!tableBody) return;
+          if (tableBody.dataset.mediaBound === "1") return;
 
-          mediaButtons.forEach(function (button) {
-            button.addEventListener("click", function () {
-              const isOn = button.classList.contains("is-on");
-              setParticipantMediaState(button, !isOn);
-              if (button.classList.contains("audio")) {
-                syncMuteAllButtonState();
-              }
-            });
+          tableBody.dataset.mediaBound = "1";
+
+          tableBody.addEventListener("click", function (event) {
+            const toggleButton = event.target.closest(".media-toggle");
+            if (toggleButton && tableBody.contains(toggleButton)) {
+              const isOn = toggleButton.classList.contains("is-on");
+              void applyParticipantMediaChange(toggleButton, !isOn);
+              return;
+            }
+
+            const mediaCell = event.target.closest(".media-cell");
+            if (!mediaCell || !tableBody.contains(mediaCell)) {
+              return;
+            }
+
+            const button = mediaCell.querySelector(".media-toggle");
+            if (!button) {
+              return;
+            }
+
+            const isOn = button.classList.contains("is-on");
+            void applyParticipantMediaChange(button, !isOn);
           });
         }
 
+        function initParticipantContextMenu() {
+          if (document.body.dataset.participantContextBound === "1") {
+            return;
+          }
+
+          const tableBody = document.querySelector(
+            ".active-conferences-scroll tbody",
+          );
+          const zoomGrid = document.querySelector(".zoom-grid");
+          const zoomStage = document.querySelector(".zoom-stage");
+          if (!tableBody || !zoomGrid || !zoomStage) {
+            return;
+          }
+
+          document.body.dataset.participantContextBound = "1";
+
+          const menu = document.createElement("div");
+          menu.className = "participant-context-menu";
+          menu.hidden = true;
+          menu.innerHTML =
+            '<button type="button" class="participant-context-menu__item" data-action="audio"></button>' +
+            '<button type="button" class="participant-context-menu__item" data-action="camera"></button>' +
+            '<button type="button" class="participant-context-menu__item" data-action="video"></button>' +
+            '<button type="button" class="participant-context-menu__item" data-action="mic"></button>' +
+            '<button type="button" class="participant-context-menu__item" data-action="presentation"></button>' +
+            '<button type="button" class="participant-context-menu__item is-danger" data-action="disconnect">Disconnect</button>';
+          document.body.appendChild(menu);
+
+          let activeRow = null;
+          let activeTile = null;
+          let activeParticipantNumber = "";
+
+          function normalizeName(value) {
+            return String(value || "")
+              .trim()
+              .replace(/\s+/g, " ")
+              .toLowerCase();
+          }
+
+          function getTileName(tile) {
+            if (!tile) {
+              return "";
+            }
+
+            const siteName = String(tile.dataset.siteName || "").trim();
+            if (siteName) {
+              return siteName;
+            }
+
+            const label = tile.querySelector(".zoom-label");
+            return label ? String(label.textContent || "").trim() : "";
+          }
+
+          function getRowName(row) {
+            const displayName = getParticipantDisplayNameFromRow(row);
+            const normalizedDisplay = normalizeName(displayName);
+            if (
+              normalizedDisplay &&
+              normalizedDisplay !== "-" &&
+              normalizedDisplay !== "--"
+            ) {
+              return displayName;
+            }
+
+            const participantNumber = getParticipantNumberFromRow(row);
+            if (participantNumber) {
+              return participantNumber;
+            }
+
+            const idCell = row && row.children ? row.children[0] : null;
+            if (!idCell) {
+              return "";
+            }
+
+            return String(
+              idCell.getAttribute("title") || idCell.textContent || "",
+            ).trim();
+          }
+
+          function findRowByName(name) {
+            const normalized = normalizeName(name);
+            if (!normalized) {
+              return null;
+            }
+
+            const rows = Array.from(tableBody.querySelectorAll("tr")).filter(
+              function (row) {
+                return !row.classList.contains("participant-empty-row");
+              },
+            );
+
+            return (
+              rows.find(function (row) {
+                const candidates = [];
+
+                const rowName = getRowName(row);
+                if (rowName) {
+                  candidates.push(rowName);
+                }
+
+                const participantNumber = getParticipantNumberFromRow(row);
+                if (participantNumber) {
+                  candidates.push(participantNumber);
+                }
+
+                const idCell = row && row.children ? row.children[0] : null;
+                if (idCell) {
+                  const idTitle = String(idCell.getAttribute("title") || "").trim();
+                  const idText = String(idCell.textContent || "").trim();
+                  if (idTitle) candidates.push(idTitle);
+                  if (idText) candidates.push(idText);
+                }
+
+                return candidates.some(function (candidate) {
+                  return normalizeName(candidate) === normalized;
+                });
+              }) || null
+            );
+          }
+
+          function findTileByName(name) {
+            const normalized = normalizeName(name);
+            if (!normalized) {
+              return null;
+            }
+
+            const tiles = Array.from(
+              zoomGrid.querySelectorAll(".zoom-tile:not(.zoom-overlay-tile)"),
+            );
+            return (
+              tiles.find(function (tile) {
+                return normalizeName(getTileName(tile)) === normalized;
+              }) || null
+            );
+          }
+
+          function getLinkedTile(row) {
+            return findTileByName(getRowName(row));
+          }
+
+          function getLinkedRow(tile) {
+            return findRowByName(getTileName(tile));
+          }
+
+          function getMediaButton(row, mediaType) {
+            if (!row) {
+              return null;
+            }
+            return row.querySelector(".media-toggle." + mediaType);
+          }
+
+          function findRowByParticipantNumber(participantNumber) {
+            const normalized = String(participantNumber || "").trim();
+            if (!normalized) {
+              return null;
+            }
+
+            const rows = Array.from(tableBody.querySelectorAll("tr")).filter(
+              function (row) {
+                return !row.classList.contains("participant-empty-row");
+              },
+            );
+
+            return (
+              rows.find(function (row) {
+                return getParticipantNumberFromRow(row) === normalized;
+              }) || null
+            );
+          }
+
+          function resolveActiveRow() {
+            if (activeParticipantNumber) {
+              const rowByNumber = findRowByParticipantNumber(
+                activeParticipantNumber,
+              );
+              if (rowByNumber) {
+                activeRow = rowByNumber;
+                return rowByNumber;
+              }
+            }
+
+            if (activeRow && document.contains(activeRow)) {
+              return activeRow;
+            }
+
+            return null;
+          }
+
+          function resolveActiveTile(row) {
+            if (activeTile && document.contains(activeTile)) {
+              return activeTile;
+            }
+
+            const linkedTile = getLinkedTile(row);
+            if (linkedTile) {
+              activeTile = linkedTile;
+            }
+            return linkedTile;
+          }
+
+          function setItemLabel(action, text) {
+            const item = menu.querySelector('[data-action="' + action + '"]');
+            if (item) {
+              item.textContent = text;
+            }
+          }
+
+          function updateMenuLabels() {
+            const row = resolveActiveRow();
+            if (!row) {
+              return;
+            }
+
+            const audioButton = getMediaButton(row, "audio");
+            const cameraButton = getMediaButton(row, "camera");
+            const videoButton = getMediaButton(row, "video");
+            const micButton = getMediaButton(row, "mic");
+            const presentationOn = row.dataset.presentationState === "on";
+
+            setItemLabel(
+              "audio",
+              audioButton && audioButton.classList.contains("is-on")
+                ? "Turn off audio"
+                : "Turn on audio",
+            );
+            setItemLabel(
+              "camera",
+              cameraButton && cameraButton.classList.contains("is-on")
+                ? "Turn off camera"
+                : "Turn on camera",
+            );
+            setItemLabel(
+              "video",
+              videoButton && videoButton.classList.contains("is-on")
+                ? "Turn off video"
+                : "Turn on video",
+            );
+            setItemLabel(
+              "mic",
+              micButton && micButton.classList.contains("is-on")
+                ? "Turn off mic"
+                : "Turn on mic",
+            );
+            setItemLabel(
+              "presentation",
+              presentationOn ? "Disable presentation" : "Show presentation",
+            );
+          }
+
+          function closeMenu() {
+            menu.hidden = true;
+            activeRow = null;
+            activeTile = null;
+            activeParticipantNumber = "";
+          }
+
+          function openMenu(x, y, row, tile) {
+            activeRow = row;
+            activeParticipantNumber = getParticipantNumberFromRow(row);
+            activeTile = tile || getLinkedTile(row);
+            updateMenuLabels();
+
+            menu.hidden = false;
+            menu.style.left = "0px";
+            menu.style.top = "0px";
+
+            const menuWidth = menu.offsetWidth;
+            const menuHeight = menu.offsetHeight;
+            const maxLeft = Math.max(window.innerWidth - menuWidth - 8, 8);
+            const maxTop = Math.max(window.innerHeight - menuHeight - 8, 8);
+
+            menu.style.left = Math.max(8, Math.min(x, maxLeft)) + "px";
+            menu.style.top = Math.max(8, Math.min(y, maxTop)) + "px";
+          }
+
+          tableBody.addEventListener("contextmenu", function (event) {
+            const row = event.target.closest("tr");
+            if (!row || row.classList.contains("participant-empty-row")) {
+              return;
+            }
+
+            event.preventDefault();
+            openMenu(event.clientX, event.clientY, row, getLinkedTile(row));
+          });
+
+          zoomStage.addEventListener("contextmenu", function (event) {
+            const tile = event.target.closest(
+              ".zoom-tile:not(.zoom-overlay-tile)",
+            );
+            if (!tile) {
+              return;
+            }
+
+            const row = getLinkedRow(tile);
+            if (!row) {
+              return;
+            }
+
+            event.preventDefault();
+            openMenu(event.clientX, event.clientY, row, tile);
+          });
+
+          menu.addEventListener("click", async function (event) {
+            const item = event.target.closest(
+              ".participant-context-menu__item",
+            );
+            if (!item) {
+              return;
+            }
+
+            const row = resolveActiveRow();
+            if (!row) {
+              closeMenu();
+              return;
+            }
+
+            const action = item.dataset.action || "";
+
+            if (action === "disconnect") {
+              closeMenu();
+              triggerKickWithConfirmation(row);
+              return;
+            }
+
+            if (action === "presentation") {
+              const nextState =
+                row.dataset.presentationState === "on" ? "off" : "on";
+              row.dataset.presentationState = nextState;
+              const tile = resolveActiveTile(row);
+              if (tile) {
+                tile.classList.toggle("is-presentation", nextState === "on");
+              }
+              updateMenuLabels();
+              return;
+            }
+
+            const participantNumber = getParticipantNumberFromRow(row);
+            const mediaButton =
+              getMediaButton(row, action) ||
+              findRenderedMediaButton(participantNumber, action);
+            if (!mediaButton) {
+              return;
+            }
+
+            const shouldBeOn = !mediaButton.classList.contains("is-on");
+            await applyParticipantMediaChange(mediaButton, shouldBeOn, {
+              mediaType: action,
+              participantNumber: participantNumber,
+            });
+            updateMenuLabels();
+          });
+
+          document.addEventListener("click", function (event) {
+            if (menu.hidden) {
+              return;
+            }
+            if (menu.contains(event.target)) {
+              return;
+            }
+            closeMenu();
+          });
+
+          document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape") {
+              closeMenu();
+            }
+          });
+
+          window.addEventListener("resize", closeMenu);
+          window.addEventListener(
+            "scroll",
+            function () {
+              if (!menu.hidden) {
+                closeMenu();
+              }
+            },
+            true,
+          );
+        }
+
         function initMediaSortButtons() {
-          const table = document.querySelector(".active-conferences-scroll table");
+          const table = document.querySelector(
+            ".active-conferences-scroll table",
+          );
           const tableBody = table ? table.querySelector("tbody") : null;
           const sortButtons = document.querySelectorAll(".media-sort-btn");
           if (!tableBody || !sortButtons.length) return;
 
           function getMediaStateWeight(row, mediaType) {
             const toggle = row.querySelector(".media-toggle." + mediaType);
-            if (!toggle) return 0;
+            if (!toggle) return -1;
             return toggle.classList.contains("is-on") ? 1 : 0;
+          }
+
+          function getStatusBucket(row) {
+            const statusCell = row.querySelector("td.state");
+            if (!statusCell) return "other";
+
+            const text = String(statusCell.textContent || "")
+              .trim()
+              .toLowerCase();
+            if (text.includes("disconnect")) return "disconnected";
+            if (text.includes("standby") || text.includes("schedule"))
+              return "standby";
+            if (text.includes("connect")) return "connected";
+
+            if (statusCell.classList.contains("crit")) return "disconnected";
+            if (statusCell.classList.contains("warn")) return "standby";
+            if (statusCell.classList.contains("ok")) return "connected";
+
+            return "other";
+          }
+
+          function getStatusWeight(row, mode) {
+            const bucket = getStatusBucket(row);
+            const rankings = {
+              "connected-first": {
+                connected: 3,
+                standby: 2,
+                disconnected: 1,
+                other: 0,
+              },
+              "disconnected-first": {
+                disconnected: 3,
+                connected: 2,
+                standby: 1,
+                other: 0,
+              },
+              "standby-first": {
+                standby: 3,
+                connected: 2,
+                disconnected: 1,
+                other: 0,
+              },
+            };
+            const rankMap = rankings[mode] || rankings["connected-first"];
+            return rankMap[bucket] ?? 0;
           }
 
           sortButtons.forEach(function (button) {
             button.addEventListener("click", function () {
               const mediaType = button.dataset.sortMedia;
-              if (!mediaType) return;
+              const sortField = button.dataset.sortField;
+              if (!mediaType && sortField !== "status") return;
 
               const direction = button.dataset.sortDirection || "off-first";
+              const statusMode =
+                button.dataset.sortStatusMode || "connected-first";
               const rows = Array.from(tableBody.querySelectorAll("tr")).map(
                 function (row, index) {
                   return { row: row, index: index };
@@ -1073,10 +1863,26 @@
               );
 
               rows.sort(function (a, b) {
-                const aWeight = getMediaStateWeight(a.row, mediaType);
-                const bWeight = getMediaStateWeight(b.row, mediaType);
+                if (
+                  a.row.classList.contains("participant-empty-row") ||
+                  b.row.classList.contains("participant-empty-row")
+                ) {
+                  return a.index - b.index;
+                }
+
+                const aWeight =
+                  sortField === "status"
+                    ? getStatusWeight(a.row, statusMode)
+                    : getMediaStateWeight(a.row, mediaType);
+                const bWeight =
+                  sortField === "status"
+                    ? getStatusWeight(b.row, statusMode)
+                    : getMediaStateWeight(b.row, mediaType);
 
                 if (aWeight !== bWeight) {
+                  if (sortField === "status") {
+                    return bWeight - aWeight;
+                  }
                   if (direction === "off-first") {
                     return aWeight - bWeight;
                   }
@@ -1090,8 +1896,29 @@
                 tableBody.appendChild(entry.row);
               });
 
-              button.dataset.sortDirection =
-                direction === "off-first" ? "on-first" : "off-first";
+              if (sortField === "status") {
+                const nextMode =
+                  statusMode === "connected-first"
+                    ? "disconnected-first"
+                    : statusMode === "disconnected-first"
+                      ? "standby-first"
+                      : "connected-first";
+                button.dataset.sortStatusMode = nextMode;
+                const label =
+                  nextMode === "connected-first"
+                    ? "Connected first"
+                    : nextMode === "disconnected-first"
+                      ? "Disconnected first"
+                      : "Standby first";
+                button.title = "Sort status (" + label + ")";
+                button.setAttribute(
+                  "aria-label",
+                  "Sort status (" + label + ")",
+                );
+              } else {
+                button.dataset.sortDirection =
+                  direction === "off-first" ? "on-first" : "off-first";
+              }
             });
           });
         }
@@ -1162,22 +1989,11 @@
           const tableBody = participantTable
             ? participantTable.querySelector("tbody")
             : null;
-          const popupManager = window.DashboardPopupManager;
-          const kickPopup =
-            popupManager &&
-            typeof popupManager.createConfirmPopup === "function"
-              ? popupManager.createConfirmPopup({
-                  modalId: "kick-confirm-modal",
-                  messageSelector: "#kick-confirm-message",
-                  confirmSelector: "[data-kick-confirm]",
-                  cancelSelector: "[data-kick-cancel]",
-                  closeSelector: "[data-kick-modal-close]",
-                })
-              : null;
 
           if (!participantTable || !tableBody) return;
 
           Array.from(tableBody.querySelectorAll("tr")).forEach(function (row) {
+            if (row.classList.contains("participant-empty-row")) return;
             if (row.querySelector("td.kick-col")) return;
 
             const nameCell = row.children[1];
@@ -1206,32 +2022,17 @@
             const targetRow = kickButton.closest("tr");
             if (!targetRow) return;
 
-            const memberName = kickButton.dataset.memberName || "participant";
-            const usedModal =
-              kickPopup &&
-              kickPopup.open({
-                message:
-                  "Are you sure you want to kick " +
-                  memberName +
-                  " out of this meeting?",
-                onConfirm: function () {
-                  targetRow.remove();
-                  syncMuteAllButtonState();
-                },
-              });
-            if (usedModal) return;
-
-            const accepted = window.confirm(
-              "Are you sure you want to kick " +
-                memberName +
-                " out of this meeting?",
-            );
-            if (accepted) {
-              targetRow.remove();
-              syncMuteAllButtonState();
-            }
+            triggerKickWithConfirmation(targetRow);
           });
         }
+
+        document.addEventListener(
+          "dashboard:participant-list-updated",
+          function () {
+            initKickMemberButtons();
+            syncMuteAllButtonState();
+          },
+        );
 
         function initLeaveConferenceConfirm() {
           const leaveButton = document.querySelector(".zoom-control-btn.leave");
@@ -1260,6 +2061,168 @@
             if (usedModal) return;
             window.confirm("Are you sure you want to leave this meeting?");
           });
+        }
+        function initConferenceSearch() {
+          const searchInput = document.getElementById(
+            "conference-search-input",
+          );
+
+          if (!searchInput) return;
+
+          function normalizeSearchText(value) {
+            return String(value || "")
+              .toLowerCase()
+              .normalize("NFD")
+              .replace(/[\u0300-\u036f]/g, "")
+              .replace(/[^\w\s]/g, " ")
+              .replace(/\s+/g, " ")
+              .trim();
+          }
+
+          function applyConferenceFilter() {
+            const query = normalizeSearchText(searchInput.value);
+            const conferenceItems = Array.from(
+              document.querySelectorAll(".conference-list .conference-item"),
+            );
+
+            conferenceItems.forEach(function (item) {
+              const numberText = normalizeSearchText(item.dataset.number);
+              const descriptionText = normalizeSearchText(
+                item.dataset.description,
+              );
+              const itemText = normalizeSearchText(
+                item.textContent || numberText + " " + descriptionText,
+              );
+              const matched =
+                query.length === 0 ||
+                numberText.includes(query) ||
+                descriptionText.includes(query) ||
+                itemText.includes(query);
+              item.hidden = !matched;
+              item.style.display = matched ? "" : "none";
+            });
+
+            syncConferenceListHeight();
+          }
+
+          searchInput.addEventListener("input", applyConferenceFilter);
+          searchInput.addEventListener("search", applyConferenceFilter);
+          searchInput.addEventListener("change", applyConferenceFilter);
+        }
+
+        function initParticipantSearch() {
+          const searchInput = document.getElementById(
+            "participant-search-input",
+          );
+          const table = document.querySelector(".active-conferences-scroll table");
+          const tableBody = table ? table.querySelector("tbody") : null;
+
+          if (!searchInput || !tableBody) return;
+          if (searchInput.dataset.filterBound === "1") return;
+          searchInput.dataset.filterBound = "1";
+
+          function normalizeSearchText(value) {
+            return String(value || "")
+              .toLowerCase()
+              .normalize("NFD")
+              .replace(/[\u0300-\u036f]/g, "")
+              .replace(/[^\w\s]/g, " ")
+              .replace(/\s+/g, " ")
+              .trim();
+          }
+
+          function removeSearchEmptyRow() {
+            const searchEmptyRow = tableBody.querySelector(
+              "tr.participant-search-empty-row",
+            );
+            if (searchEmptyRow) {
+              searchEmptyRow.remove();
+            }
+          }
+
+          function ensureSearchEmptyRow() {
+            let searchEmptyRow = tableBody.querySelector(
+              "tr.participant-search-empty-row",
+            );
+            if (!searchEmptyRow) {
+              searchEmptyRow = document.createElement("tr");
+              searchEmptyRow.className =
+                "participant-empty-row participant-search-empty-row";
+              const cell = document.createElement("td");
+              cell.colSpan = 13;
+              cell.textContent = "No matched participants";
+              searchEmptyRow.appendChild(cell);
+              tableBody.appendChild(searchEmptyRow);
+            }
+            return searchEmptyRow;
+          }
+
+          function applyParticipantFilter() {
+            const query = normalizeSearchText(searchInput.value);
+            const hasBaseEmptyRow = Boolean(
+              tableBody.querySelector(
+                "tr.participant-empty-row:not(.participant-search-empty-row)",
+              ),
+            );
+
+            if (hasBaseEmptyRow) {
+              removeSearchEmptyRow();
+              return;
+            }
+
+            const rows = Array.from(tableBody.querySelectorAll("tr")).filter(
+              function (row) {
+                return (
+                  !row.classList.contains("participant-empty-row") &&
+                  !row.classList.contains("participant-search-empty-row")
+                );
+              },
+            );
+
+            let visibleCount = 0;
+            rows.forEach(function (row) {
+              const idCell = row.children[0] || null;
+              const nameCell = row.children[1] || null;
+              const idText = normalizeSearchText(
+                idCell
+                  ? idCell.getAttribute("title") || idCell.textContent || ""
+                  : "",
+              );
+              const nameText = normalizeSearchText(
+                nameCell
+                  ? nameCell.getAttribute("title") || nameCell.textContent || ""
+                  : "",
+              );
+              const matched =
+                query.length === 0 ||
+                idText.includes(query) ||
+                nameText.includes(query);
+
+              row.hidden = !matched;
+              row.style.display = matched ? "" : "none";
+              if (matched) {
+                visibleCount += 1;
+              }
+            });
+
+            if (query.length > 0 && rows.length > 0 && visibleCount === 0) {
+              const searchEmptyRow = ensureSearchEmptyRow();
+              searchEmptyRow.hidden = false;
+              searchEmptyRow.style.display = "";
+            } else {
+              removeSearchEmptyRow();
+            }
+          }
+
+          searchInput.addEventListener("input", applyParticipantFilter);
+          searchInput.addEventListener("search", applyParticipantFilter);
+          searchInput.addEventListener("change", applyParticipantFilter);
+          document.addEventListener(
+            "dashboard:participant-list-updated",
+            applyParticipantFilter,
+          );
+
+          applyParticipantFilter();
         }
 
         function syncParticipantListHeight() {
@@ -1364,9 +2327,12 @@
           initSystemTimeClock();
           initMicToggle();
           initParticipantMediaToggles();
+          initParticipantContextMenu();
           initMediaSortButtons();
           initKickMemberButtons();
           initLeaveConferenceConfirm();
+          initConferenceSearch();
+          initParticipantSearch();
           if (
             window.DashboardAddressBookManager &&
             typeof window.DashboardAddressBookManager.initAddressBookManager ===
@@ -1375,10 +2341,31 @@
             window.DashboardAddressBookManager.initAddressBookManager();
           }
           if (
+            window.DashboardConferenceManager &&
+            typeof window.DashboardConferenceManager.initConferenceManager ===
+              "function"
+          ) {
+            window.DashboardConferenceManager.initConferenceManager();
+          }
+          if (
+            window.DashboardParticipantManager &&
+            typeof window.DashboardParticipantManager.initParticipantManager ===
+              "function"
+          ) {
+            window.DashboardParticipantManager.initParticipantManager();
+          }
+          if (
             window.DashboardLayout &&
             typeof window.DashboardLayout.initLayoutSelector === "function"
           ) {
             window.DashboardLayout.initLayoutSelector();
+          }
+          if (
+            window.DashboardStageStream &&
+            typeof window.DashboardStageStream.initStageStreamManager ===
+              "function"
+          ) {
+            window.DashboardStageStream.initStageStreamManager();
           }
           syncDashboardLayoutHeights();
           window.requestAnimationFrame(syncDashboardLayoutHeights);
@@ -1388,6 +2375,7 @@
     </script>
   </body>
 </html>
+
 
 
 

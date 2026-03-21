@@ -1,4 +1,82 @@
-﻿(function () {
+(function () {
+  const PARTICIPANT_DRAG_TYPE = "application/x-dashboard-participant-name";
+  const EMPTY_PARTICIPANT_LABEL = "No Participant";
+  let participantNames = [];
+  let participantCursor = 0;
+  let draggedParticipantName = "";
+  let initialParticipantOrder = [];
+  let screenParticipantOrder = [];
+  let pendingMosaicRequestId = 0;
+
+  function getApiClient() {
+    return window.DashboardAxios && window.DashboardAxios.vinteo
+      ? window.DashboardAxios.vinteo
+      : null;
+  }
+
+  function getActiveConferenceNumber() {
+    const activeItem = document.querySelector(".conference-item.active");
+    if (!activeItem) {
+      return "";
+    }
+    return String(activeItem.dataset.number || "").trim();
+  }
+
+  function normalizeMosaicCode(layoutCode) {
+    return String(layoutCode || "")
+      .trim()
+      .toLowerCase();
+  }
+
+  async function syncConferenceMosaic(layoutCode) {
+    const apiClient = getApiClient();
+    if (!apiClient) {
+      return;
+    }
+
+    const conferenceNumber = getActiveConferenceNumber();
+    const mosaicCode = normalizeMosaicCode(layoutCode);
+
+    if (!conferenceNumber || !mosaicCode) {
+      return;
+    }
+
+    const requestId = ++pendingMosaicRequestId;
+
+    try {
+      await apiClient.post("/api/v1/disable_lecturer_mode", {
+        conference: conferenceNumber,
+      });
+    } catch (_error) {
+      // Ignore: conference may not be in lecturer mode.
+    }
+
+    await apiClient.post("/api/v1/mosaic", {
+      conference: conferenceNumber,
+      mosaic: mosaicCode,
+    });
+
+    if (requestId !== pendingMosaicRequestId) {
+      return;
+    }
+
+    document.dispatchEvent(
+      new CustomEvent("dashboard:conference-mosaic-changed", {
+        detail: {
+          conference: conferenceNumber,
+          mosaic: mosaicCode,
+        },
+      }),
+    );
+
+    if (
+      window.DashboardStageStream &&
+      typeof window.DashboardStageStream.loadConferenceStream === "function"
+    ) {
+      void window.DashboardStageStream.loadConferenceStream(conferenceNumber);
+    }
+  }
+
   function getLayoutCode(thumb) {
     const src = thumb.getAttribute("src") || "";
     const fileName = src.split("/").pop() || "";
@@ -33,16 +111,323 @@
     return { mode: "focus", total: Math.min(total, 25), main };
   }
 
-  function createZoomTile(index, isMain) {
+  function normalizeParticipantName(name) {
+    return String(name || "")
+      .trim()
+      .replace(/\s+/g, " ")
+      .toLowerCase();
+  }
+
+  function getParticipantNameFromRow(row) {
+    if (!row || row.classList.contains("participant-empty-row")) {
+      return "";
+    }
+
+    const nameCell = row.children[1];
+    if (!nameCell) {
+      return "";
+    }
+
+    let name = String(
+      nameCell.getAttribute("title") || nameCell.textContent || "",
+    ).trim();
+
+    if (!name || /^loading participants\.{0,3}$/i.test(name) || /^no participants$/i.test(name)) {
+      return "";
+    }
+
+    if (name === "-" || name === "--") {
+      const idCell = row.children[0];
+      const idFallback = String(
+        (idCell && (idCell.getAttribute("title") || idCell.textContent)) || "",
+      ).trim();
+      name = idFallback || "";
+    }
+
+    return name;
+  }
+
+  function collectParticipantNames() {
+    const rows = Array.from(
+      document.querySelectorAll(".active-conferences-scroll tbody tr"),
+    );
+
+    return rows
+      .map(function (row) {
+        return getParticipantNameFromRow(row);
+      })
+      .filter(function (name) {
+        return name.length > 0;
+      });
+  }
+
+  function beginParticipantAssignment() {
+    participantNames = getRenderParticipantNames();
+    participantCursor = 0;
+  }
+
+  function takeParticipantName() {
+    if (participantCursor < participantNames.length) {
+      const name = participantNames[participantCursor];
+      participantCursor += 1;
+      return name;
+    }
+    return EMPTY_PARTICIPANT_LABEL;
+  }
+
+  function isRenderableParticipantName(name) {
+    const normalized = normalizeParticipantName(name);
+    return Boolean(
+      normalized && normalized !== normalizeParticipantName(EMPTY_PARTICIPANT_LABEL),
+    );
+  }
+
+  function pushUniqueParticipant(list, name) {
+    if (!isRenderableParticipantName(name)) {
+      return;
+    }
+    const trimmedName = String(name).trim();
+    const normalizedName = normalizeParticipantName(trimmedName);
+    if (
+      list.some(function (entry) {
+        return normalizeParticipantName(entry) === normalizedName;
+      })
+    ) {
+      return;
+    }
+    list.push(trimmedName);
+  }
+
+  function ensureInitialParticipantOrder() {
+    if (initialParticipantOrder.length > 0) return;
+    initialParticipantOrder = collectParticipantNames();
+  }
+
+  function getRenderParticipantNames() {
+    ensureInitialParticipantOrder();
+    const availableParticipants = new Set(
+      initialParticipantOrder
+        .map(function (name) {
+          return normalizeParticipantName(name);
+        })
+        .filter(Boolean),
+    );
+
+    const ordered = [];
+    screenParticipantOrder.forEach(function (name) {
+      if (!availableParticipants.has(normalizeParticipantName(name))) {
+        return;
+      }
+      pushUniqueParticipant(ordered, name);
+    });
+    initialParticipantOrder.forEach(function (name) {
+      pushUniqueParticipant(ordered, name);
+    });
+    return ordered;
+  }
+
+  function syncScreenParticipantOrder(grid) {
+    const tiles = Array.from(
+      grid.querySelectorAll(".zoom-tile:not(.zoom-overlay-tile)"),
+    );
+    const nextOrder = [];
+    tiles.forEach(function (tile) {
+      pushUniqueParticipant(nextOrder, getTileSiteName(tile));
+    });
+    screenParticipantOrder = nextOrder;
+  }
+
+  function clearGridParticipantLabels(grid) {
+    if (!grid) return;
+    const tiles = Array.from(
+      grid.querySelectorAll(".zoom-tile:not(.zoom-overlay-tile)"),
+    );
+    tiles.forEach(function (tile) {
+      setTileSiteName(tile, EMPTY_PARTICIPANT_LABEL);
+      tile.classList.remove("is-presentation");
+    });
+    screenParticipantOrder = [];
+  }
+
+  function refreshGridParticipantLabels(grid) {
+    if (!grid) return;
+    const tiles = Array.from(
+      grid.querySelectorAll(".zoom-tile:not(.zoom-overlay-tile)"),
+    );
+    participantNames = getRenderParticipantNames();
+    tiles.forEach(function (tile, index) {
+      setTileSiteName(tile, participantNames[index] || EMPTY_PARTICIPANT_LABEL);
+    });
+    syncScreenParticipantOrder(grid);
+  }
+
+  function createZoomTile(index, isMain, options) {
     const tile = document.createElement("div");
     tile.className = "zoom-tile" + (isMain ? " main" : "");
+    const skipParticipantName =
+      options && Object.prototype.hasOwnProperty.call(options, "skipParticipantName")
+        ? options.skipParticipantName
+        : false;
+    const explicitLabel =
+      options && Object.prototype.hasOwnProperty.call(options, "label")
+        ? options.label
+        : null;
+    tile.dataset.siteName = skipParticipantName
+      ? explicitLabel || ""
+      : takeParticipantName();
 
     const label = document.createElement("span");
     label.className = "zoom-label is-mini";
-    label.textContent = "Site " + String(101 + index);
+    label.textContent = tile.dataset.siteName;
 
     tile.appendChild(label);
     return tile;
+  }
+
+  function getTileSiteName(tile) {
+    return tile.dataset.siteName || "";
+  }
+
+  function setTileSiteName(tile, siteName) {
+    tile.dataset.siteName = siteName;
+    const label = tile.querySelector(".zoom-label");
+    if (label) {
+      label.textContent = siteName;
+    }
+  }
+
+  function getDraggedParticipantName(event) {
+    if (draggedParticipantName && draggedParticipantName.trim()) {
+      return draggedParticipantName.trim();
+    }
+    if (!event.dataTransfer) return "";
+    const customValue = event.dataTransfer.getData(PARTICIPANT_DRAG_TYPE);
+    if (customValue && customValue.trim()) {
+      return customValue.trim();
+    }
+    const plainValue = event.dataTransfer.getData("text/plain");
+    return plainValue ? plainValue.trim() : "";
+  }
+
+  function enableParticipantRowDrag() {
+    const rows = Array.from(
+      document.querySelectorAll(".active-conferences-scroll tbody tr"),
+    );
+
+    rows.forEach(function (row) {
+      if (row.dataset.participantDragBound === "1") return;
+      const participantName = getParticipantNameFromRow(row);
+      if (!participantName) return;
+
+      row.dataset.participantDragBound = "1";
+      row.setAttribute("draggable", "true");
+
+      row.addEventListener("dragstart", function (event) {
+        const currentParticipantName = getParticipantNameFromRow(row);
+        if (!currentParticipantName) {
+          event.preventDefault();
+          return;
+        }
+        draggedParticipantName = currentParticipantName;
+        row.classList.add("is-participant-dragging");
+        if (event.dataTransfer) {
+          event.dataTransfer.effectAllowed = "copyMove";
+          event.dataTransfer.setData(
+            PARTICIPANT_DRAG_TYPE,
+            currentParticipantName,
+          );
+          event.dataTransfer.setData("text/plain", currentParticipantName);
+        }
+      });
+
+      row.addEventListener("dragend", function () {
+        row.classList.remove("is-participant-dragging");
+        draggedParticipantName = "";
+      });
+    });
+  }
+
+  function swapTileSiteName(tileA, tileB) {
+    const firstName = getTileSiteName(tileA);
+    setTileSiteName(tileA, getTileSiteName(tileB));
+    setTileSiteName(tileB, firstName);
+  }
+
+  function enableTileDragReorder(grid) {
+    const tiles = Array.from(
+      grid.querySelectorAll(".zoom-tile:not(.zoom-overlay-tile)"),
+    );
+    let sourceTile = null;
+
+    tiles.forEach(function (tile) {
+      tile.setAttribute("draggable", "true");
+
+      tile.addEventListener("dragstart", function (event) {
+        sourceTile = tile;
+        tile.classList.add("is-dragging");
+        if (event.dataTransfer) {
+          event.dataTransfer.effectAllowed = "move";
+          event.dataTransfer.setData("text/plain", getTileSiteName(tile));
+        }
+      });
+
+      tile.addEventListener("dragend", function () {
+        tile.classList.remove("is-dragging");
+        tiles.forEach(function (currentTile) {
+          currentTile.classList.remove("is-drop-target");
+        });
+        sourceTile = null;
+        draggedParticipantName = "";
+      });
+
+      tile.addEventListener("dragover", function (event) {
+        const draggedParticipantName = getDraggedParticipantName(event);
+        const canSwapTiles = sourceTile && sourceTile !== tile;
+        const canDropParticipant = !sourceTile && draggedParticipantName.length > 0;
+        if (!canSwapTiles && !canDropParticipant) return;
+        event.preventDefault();
+        if (event.dataTransfer) {
+          event.dataTransfer.dropEffect = canSwapTiles ? "move" : "copy";
+        }
+        tile.classList.add("is-drop-target");
+      });
+
+      tile.addEventListener("dragleave", function () {
+        tile.classList.remove("is-drop-target");
+      });
+
+      tile.addEventListener("drop", function (event) {
+        const draggedParticipantName = getDraggedParticipantName(event);
+        const canSwapTiles = sourceTile && sourceTile !== tile;
+        const canDropParticipant = !sourceTile && draggedParticipantName.length > 0;
+        if (!canSwapTiles && !canDropParticipant) return;
+        event.preventDefault();
+        tile.classList.remove("is-drop-target");
+
+        if (canDropParticipant) {
+          const existingTile = tiles.find(function (currentTile) {
+            return (
+              currentTile !== tile &&
+              getTileSiteName(currentTile) === draggedParticipantName
+            );
+          });
+
+          const replacedName = getTileSiteName(tile);
+          setTileSiteName(tile, draggedParticipantName);
+
+          if (existingTile) {
+            setTileSiteName(existingTile, replacedName);
+          }
+          syncScreenParticipantOrder(grid);
+          draggedParticipantName = "";
+          return;
+        }
+
+        swapTileSiteName(sourceTile, tile);
+        syncScreenParticipantOrder(grid);
+        draggedParticipantName = "";
+      });
+    });
   }
 
   function createMicroHost(startIndex) {
@@ -55,7 +440,7 @@
 
       const label = document.createElement("span");
       label.className = "zoom-micro-label";
-      label.textContent = "Site " + String(101 + startIndex + i);
+      label.textContent = takeParticipantName();
 
       cell.appendChild(label);
       host.appendChild(cell);
@@ -67,6 +452,22 @@
   function renderEqualLayout(grid, total, code) {
     grid.classList.remove("focus-mode");
     grid.classList.toggle("single", total === 1);
+
+    if (total === 2) {
+      grid.style.gridTemplateColumns = "repeat(2, 1fr)";
+      grid.style.gridTemplateRows = "1fr 1.9fr 1fr";
+
+      const leftTile = createZoomTile(0, true);
+      leftTile.style.gridColumn = "1";
+      leftTile.style.gridRow = "2";
+      grid.appendChild(leftTile);
+
+      const rightTile = createZoomTile(1, false);
+      rightTile.style.gridColumn = "2";
+      rightTile.style.gridRow = "2";
+      grid.appendChild(rightTile);
+      return;
+    }
 
     if (total === 3 && /alter/.test(code)) {
       grid.style.gridTemplateColumns = "repeat(4, 1fr)";
@@ -414,6 +815,29 @@
         tile.style.gridColumn = String(((i - 9) % 6) + 1);
         tile.style.gridRow = String(Math.floor((i - 9) / 6) + 5);
         grid.appendChild(tile);
+      }
+      return;
+    }
+
+    if (code === "1v21") {
+      grid.style.gridTemplateColumns = "repeat(5, 1fr)";
+      grid.style.gridTemplateRows = "repeat(5, 1fr)";
+
+      const mainTile = createZoomTile(0, true);
+      mainTile.style.gridColumn = "1 / span 2";
+      mainTile.style.gridRow = "1 / span 2";
+      grid.appendChild(mainTile);
+
+      let tileIndex = 1;
+      for (let row = 1; row <= 5; row += 1) {
+        for (let col = 1; col <= 5; col += 1) {
+          if (row <= 2 && col <= 2) continue;
+          const tile = createZoomTile(tileIndex, false);
+          tile.style.gridColumn = String(col);
+          tile.style.gridRow = String(row);
+          grid.appendChild(tile);
+          tileIndex += 1;
+        }
       }
       return;
     }
@@ -849,7 +1273,10 @@
       mainRight.style.gridRow = "1";
       grid.appendChild(mainRight);
 
-      const overlay = createZoomTile(25, false);
+      const overlay = createZoomTile(25, false, {
+        skipParticipantName: true,
+        label: "",
+      });
       overlay.classList.add("zoom-overlay-tile");
       overlay.style.gridColumn = "8";
       overlay.style.gridRow = "1";
@@ -976,6 +1403,7 @@
     const thumbs = Array.from(document.querySelectorAll(".layout-thumb"));
 
     if (!grid || thumbs.length === 0) return;
+    let activeThumb = null;
 
     function setActiveThumb(activeThumb) {
       thumbs.forEach(function (thumb) {
@@ -983,7 +1411,8 @@
       });
     }
 
-    function renderFromThumb(thumb) {
+    function renderFromThumb(thumb, options) {
+      const syncUpstream = !options || options.syncUpstream !== false;
       const layoutType =
         thumb.dataset.layoutType ||
         thumb.closest(".layout-group")?.dataset.layoutType ||
@@ -994,6 +1423,7 @@
       grid.innerHTML = "";
       grid.style.gridTemplateColumns = "";
       grid.style.gridTemplateRows = "";
+      beginParticipantAssignment();
 
       if (spec.mode === "focus") {
         renderFocusLayout(grid, spec.total, layoutCode);
@@ -1001,11 +1431,31 @@
         renderEqualLayout(grid, spec.total, layoutCode);
       }
 
+      enableTileDragReorder(grid);
+
       if (controls) {
         grid.appendChild(controls);
       }
 
+      activeThumb = thumb;
       setActiveThumb(thumb);
+      syncScreenParticipantOrder(grid);
+
+      document.dispatchEvent(
+        new CustomEvent("dashboard:layout-rendered", {
+          detail: {
+            layoutCode: layoutCode,
+            mode: spec.mode,
+            total: spec.total,
+          },
+        }),
+      );
+
+      if (syncUpstream) {
+        void syncConferenceMosaic(layoutCode).catch(function (error) {
+          console.error("Cannot sync conference mosaic:", error);
+        });
+      }
     }
 
     thumbs.forEach(function (thumb) {
@@ -1013,13 +1463,13 @@
       thumb.setAttribute("role", "button");
 
       thumb.addEventListener("click", function () {
-        renderFromThumb(thumb);
+        renderFromThumb(thumb, { syncUpstream: true });
       });
 
       thumb.addEventListener("keydown", function (event) {
         if (event.key !== "Enter" && event.key !== " ") return;
         event.preventDefault();
-        renderFromThumb(thumb);
+        renderFromThumb(thumb, { syncUpstream: true });
       });
     });
 
@@ -1028,8 +1478,42 @@
         '.layout-group[data-layout-type="equal"] .layout-thumb',
       ) || thumbs[0];
 
+    const participantTableBody = document.querySelector(
+      ".active-conferences-scroll tbody",
+    );
+    if (participantTableBody && !participantTableBody.dataset.layoutSyncBound) {
+      participantTableBody.dataset.layoutSyncBound = "1";
+      const observer = new MutationObserver(function () {
+        enableParticipantRowDrag();
+      });
+      observer.observe(participantTableBody, {
+        childList: true,
+        subtree: true,
+        characterData: true,
+      });
+    }
+
+    enableParticipantRowDrag();
+
+    document.addEventListener("dashboard:conference-active-changed", function () {
+      participantNames = [];
+      participantCursor = 0;
+      initialParticipantOrder = [];
+      pendingMosaicRequestId = 0;
+      clearGridParticipantLabels(grid);
+    });
+
+    document.addEventListener("dashboard:participant-list-updated", function () {
+      if (!activeThumb) {
+        return;
+      }
+      initialParticipantOrder = collectParticipantNames();
+      refreshGridParticipantLabels(grid);
+      enableParticipantRowDrag();
+    });
+
     if (defaultThumb) {
-      renderFromThumb(defaultThumb);
+      renderFromThumb(defaultThumb, { syncUpstream: false });
     }
   }
 
