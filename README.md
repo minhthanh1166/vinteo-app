@@ -4,7 +4,7 @@ Vinteo RMX Manager is a Django-based operations dashboard for Vinteo conferencin
 
 ## UI Preview
 
-![Vinteo RMX Manager Dashboard](docs/images/dashboard-preview.png)
+![Vinteo RMX Manager Dashboard](docs/images/dashboard-preview.jpg)
 
 ## Tech stack
 - Python 3.14 + Django 6
@@ -18,7 +18,7 @@ Vinteo RMX Manager is a Django-based operations dashboard for Vinteo conferencin
 |- README.md
 |- docs/
 |  \- images/
-|     \- dashboard-preview.png
+|     \- dashboard-preview.jpg
 |- vinteo_app/
 |  |- manage.py
 |  |- requirements.txt
@@ -79,3 +79,5 @@ Services:
 - App: `http://127.0.0.1:8000`
 - Postgres: `localhost:5432`
 - pgAdmin: `http://127.0.0.1:5050`
+
+
