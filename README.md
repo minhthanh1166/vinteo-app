@@ -2,13 +2,6 @@
 
 Vinteo RMX Manager is a Django-based operations dashboard for Vinteo conferencing systems.
 
-It provides:
-- Conference management (list, create, update, delete, start, stop)
-- Participant monitoring and controls (mic/camera/audio/video/kick)
-- Dynamic stage layouts (Equal/Focus presets with drag-and-drop tiles)
-- Stage stream playback (HLS/preview) and lecturer focus actions
-- Backend proxy (`/api/vinteo/*`) with automatic JWT login/refresh to upstream Vinteo API
-
 ## Tech stack
 - Python 3.14 + Django 6
 - Vanilla JavaScript modules + Axios + HLS.js
@@ -55,34 +48,17 @@ Optional (if you need admin login):
 python manage.py createsuperuser
 ```
 
-## Environment variables
+## Main features
 
-Create `vinteo_app/.env` (or update existing one). Minimum for upstream Vinteo calls:
-
-```env
-BASE_URL=https://your-vinteo-host
-VINTEO_USERNAME=admin
-VINTEO_PASSWORD=your-password
-VINTEO_VERIFY_SSL=false
-```
-
-Common Django/DB options:
-
-```env
-DEBUG=True
-SECRET_KEY=django-secret-key-change-me
-ALLOWED_HOSTS=127.0.0.1,localhost
-
-POSTGRES_DB=vinteo_db
-POSTGRES_USER=vinteo_user
-POSTGRES_PASSWORD=vinteo_password
-POSTGRES_HOST=db
-POSTGRES_PORT=5432
-```
-
-Notes:
-- If Postgres variables are not fully set, the app falls back to SQLite (`db.sqlite3`).
-- The proxy route is `GET/POST/PUT/PATCH/DELETE /api/vinteo/<endpoint>`.
+- Conference list with search, status display, start/stop, create, edit, and delete.
+- Conference settings modal with tabs (`Main`, `Call`, `Connection`, `Advanced`).
+- Participant table with auto refresh, search, status sort, and detail enrichment.
+- Per-participant controls: mic, camera, audio, video, kick, and context menu actions.
+- Bulk controls for all participants (mute mic/camera/audio/video).
+- Layout selector (Equal/Focus presets) with drag-and-drop participant placement.
+- Stage stream manager with HLS playback, preview fallback, and lecturer focus flow.
+- Address book panel with add participant/group interactions.
+- Backend proxy at `/api/vinteo/*` with automatic JWT login/refresh to Vinteo API.
 
 ## Docker quick start
 
