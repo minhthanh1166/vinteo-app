@@ -76,6 +76,9 @@ def vinteo_proxy(request, endpoint: str):
     content_type = request.META.get("CONTENT_TYPE", "").strip()
     if content_type:
         extra_headers["Content-Type"] = content_type
+    accept = request.META.get("HTTP_ACCEPT", "").strip()
+    if accept:
+        extra_headers["Accept"] = accept
 
     try:
         response = vinteo_client.request(

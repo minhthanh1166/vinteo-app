@@ -126,6 +126,23 @@
                         placeholder="Search participant by ID or Name"
                         aria-label="Search participant by ID or Name"
                       />
+                      <button
+                        type="button"
+                        id="participant-fast-call-btn"
+                        class="participant-call-btn"
+                        title="Call participant by IP or URI"
+                        aria-label="Call participant by IP or URI"
+                        data-call-type="SIP"
+                        data-call-resolution="720p"
+                        data-call-speed="1536"
+                        data-call-fps="25"
+                      >
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                          <path
+                            d="M6.54 5a1.5 1.5 0 0 1 1.4.95l1.2 3a1.5 1.5 0 0 1-.35 1.59l-1.06 1.06a14.1 14.1 0 0 0 4.67 4.67l1.06-1.06a1.5 1.5 0 0 1 1.59-.35l3 1.2A1.5 1.5 0 0 1 19 17.46V20a1 1 0 0 1-1 1C10.82 21 3 13.18 3 4a1 1 0 0 1 1-1z"
+                          />
+                        </svg>
+                      </button>
                     </div>
                   </div>
                   <div class="active-conferences-scroll">
@@ -154,7 +171,6 @@
                             </div>
                           </th>
                           <th>Role</th>
-                          <th>Network</th>
                           <th>IP</th>
                           <th>Type</th>
                           <th>SIP</th>
@@ -239,7 +255,7 @@
                       </thead>
                       <tbody>
                         <tr class="participant-empty-row">
-                          <td colspan="13">Loading participants...</td>
+                          <td colspan="12">Loading participants...</td>
                         </tr>
                       </tbody>
                     </table>

@@ -7,6 +7,8 @@
   let initialParticipantOrder = [];
   let screenParticipantOrder = [];
   let pendingMosaicRequestId = 0;
+  let pendingMosaicSyncTimer = null;
+  let pendingMosaicLayoutCode = "";
 
   function getApiClient() {
     return window.DashboardAxios && window.DashboardAxios.vinteo
@@ -68,13 +70,27 @@
         },
       }),
     );
+  }
 
-    if (
-      window.DashboardStageStream &&
-      typeof window.DashboardStageStream.loadConferenceStream === "function"
-    ) {
-      void window.DashboardStageStream.loadConferenceStream(conferenceNumber);
+  function scheduleConferenceMosaicSync(layoutCode) {
+    const mosaicCode = normalizeMosaicCode(layoutCode);
+    if (!mosaicCode) {
+      return;
     }
+
+    pendingMosaicLayoutCode = mosaicCode;
+    if (pendingMosaicSyncTimer) {
+      window.clearTimeout(pendingMosaicSyncTimer);
+    }
+
+    pendingMosaicSyncTimer = window.setTimeout(function () {
+      pendingMosaicSyncTimer = null;
+      const targetMosaicCode = pendingMosaicLayoutCode;
+      pendingMosaicLayoutCode = "";
+      void syncConferenceMosaic(targetMosaicCode).catch(function (error) {
+        console.error("Cannot sync conference mosaic:", error);
+      });
+    }, 180);
   }
 
   function getLayoutCode(thumb) {
@@ -161,8 +177,8 @@
       });
   }
 
-  function beginParticipantAssignment() {
-    participantNames = getRenderParticipantNames();
+  function beginParticipantAssignment(maxVisibleTiles) {
+    participantNames = getRenderParticipantNames(maxVisibleTiles);
     participantCursor = 0;
   }
 
@@ -203,7 +219,139 @@
     initialParticipantOrder = collectParticipantNames();
   }
 
-  function getRenderParticipantNames() {
+  function isRowToggleOn(row, mediaType) {
+    if (!row) {
+      return false;
+    }
+    const toggle = row.querySelector(".media-toggle." + mediaType);
+    return Boolean(toggle && toggle.classList.contains("is-on"));
+  }
+
+  function inferRowConnectivityScore(row) {
+    if (!row) {
+      return 0;
+    }
+    const statusCell = row.children && row.children[2] ? row.children[2] : null;
+    const statusText = String(
+      (statusCell && statusCell.textContent) || "",
+    ).trim().toLowerCase();
+
+    if (
+      statusText.includes("disconnect") ||
+      (statusCell && statusCell.classList.contains("crit"))
+    ) {
+      return -20;
+    }
+    if (statusText.includes("connect") || (statusCell && statusCell.classList.contains("ok"))) {
+      return 12;
+    }
+    return 0;
+  }
+
+  function collectParticipantPriorityMap() {
+    const rows = Array.from(
+      document.querySelectorAll(".active-conferences-scroll tbody tr"),
+    );
+    const priorityMap = new Map();
+
+    rows.forEach(function (row) {
+      if (!row || row.classList.contains("participant-empty-row")) {
+        return;
+      }
+
+      const participantName = getParticipantNameFromRow(row);
+      const normalizedName = normalizeParticipantName(participantName);
+      if (!normalizedName) {
+        return;
+      }
+
+      const hasShot = Boolean(String(row.dataset.participantShot || "").trim());
+      const cameraOn = isRowToggleOn(row, "camera");
+      const videoOn = isRowToggleOn(row, "video");
+      const audioOn = isRowToggleOn(row, "audio");
+
+      let score = 0;
+      if (hasShot) {
+        score += 120;
+      }
+      if (cameraOn) {
+        score += 35;
+      }
+      if (videoOn) {
+        score += 20;
+      }
+      if (audioOn) {
+        score += 5;
+      }
+      score += inferRowConnectivityScore(row);
+
+      const existing = priorityMap.get(normalizedName);
+      if (!existing || score > existing.score) {
+        priorityMap.set(normalizedName, {
+          name: participantName,
+          score: score,
+        });
+      }
+    });
+
+    return priorityMap;
+  }
+
+  function prioritizeVisibleParticipants(names, maxVisibleTiles) {
+    const orderedNames = Array.isArray(names) ? names.slice() : [];
+    if (!orderedNames.length) {
+      return [];
+    }
+
+    const visibleLimitValue = Number(maxVisibleTiles);
+    const visibleLimit =
+      Number.isFinite(visibleLimitValue) && visibleLimitValue > 0
+        ? Math.floor(visibleLimitValue)
+        : orderedNames.length;
+    const effectiveLimit = Math.max(1, Math.min(visibleLimit, orderedNames.length));
+    const priorityMap = collectParticipantPriorityMap();
+
+    const annotated = orderedNames.map(function (name, index) {
+      const normalizedName = normalizeParticipantName(name);
+      const priority = priorityMap.get(normalizedName);
+      return {
+        name: name,
+        normalizedName: normalizedName,
+        index: index,
+        score: priority ? Number(priority.score || 0) : 0,
+      };
+    });
+
+    const ranked = annotated.slice().sort(function (a, b) {
+      if (a.score !== b.score) {
+        return b.score - a.score;
+      }
+      return a.index - b.index;
+    });
+
+    const selectedTop = ranked.slice(0, effectiveLimit);
+    const selectedKeys = new Set(
+      selectedTop.map(function (entry) {
+        return entry.normalizedName;
+      }),
+    );
+
+    const result = selectedTop.map(function (entry) {
+      return entry.name;
+    });
+
+    orderedNames.forEach(function (name) {
+      const normalizedName = normalizeParticipantName(name);
+      if (selectedKeys.has(normalizedName)) {
+        return;
+      }
+      result.push(name);
+    });
+
+    return result;
+  }
+
+  function getRenderParticipantNames(maxVisibleTiles) {
     ensureInitialParticipantOrder();
     const availableParticipants = new Set(
       initialParticipantOrder
@@ -223,7 +371,7 @@
     initialParticipantOrder.forEach(function (name) {
       pushUniqueParticipant(ordered, name);
     });
-    return ordered;
+    return prioritizeVisibleParticipants(ordered, maxVisibleTiles);
   }
 
   function syncScreenParticipantOrder(grid) {
@@ -254,7 +402,7 @@
     const tiles = Array.from(
       grid.querySelectorAll(".zoom-tile:not(.zoom-overlay-tile)"),
     );
-    participantNames = getRenderParticipantNames();
+    participantNames = getRenderParticipantNames(tiles.length);
     tiles.forEach(function (tile, index) {
       setTileSiteName(tile, participantNames[index] || EMPTY_PARTICIPANT_LABEL);
     });
@@ -294,6 +442,29 @@
     if (label) {
       label.textContent = siteName;
     }
+  }
+
+  function emitLayoutTilesUpdated(grid) {
+    if (!grid) {
+      return;
+    }
+
+    const tiles = Array.from(
+      grid.querySelectorAll(".zoom-tile:not(.zoom-overlay-tile)"),
+    );
+    const names = tiles.map(function (tile) {
+      return String(getTileSiteName(tile) || "").trim();
+    });
+
+    document.dispatchEvent(
+      new CustomEvent("dashboard:layout-tiles-updated", {
+        detail: {
+          layoutCode: String(grid.dataset.layoutCode || "").trim().toLowerCase(),
+          names: names,
+          total: tiles.length,
+        },
+      }),
+    );
   }
 
   function getDraggedParticipantName(event) {
@@ -419,12 +590,14 @@
             setTileSiteName(existingTile, replacedName);
           }
           syncScreenParticipantOrder(grid);
+          emitLayoutTilesUpdated(grid);
           draggedParticipantName = "";
           return;
         }
 
         swapTileSiteName(sourceTile, tile);
         syncScreenParticipantOrder(grid);
+        emitLayoutTilesUpdated(grid);
         draggedParticipantName = "";
       });
     });
@@ -1404,6 +1577,8 @@
 
     if (!grid || thumbs.length === 0) return;
     let activeThumb = null;
+    let pendingRenderFrameId = 0;
+    let pendingRenderPayload = null;
 
     function setActiveThumb(activeThumb) {
       thumbs.forEach(function (thumb) {
@@ -1419,11 +1594,18 @@
         "equal";
       const layoutCode = getLayoutCode(thumb);
       const spec = parseLayoutSpec(layoutType, layoutCode);
+      const currentLayoutCode = String(grid.dataset.layoutCode || "")
+        .trim()
+        .toLowerCase();
+
+      if (activeThumb === thumb && currentLayoutCode === layoutCode) {
+        return;
+      }
 
       grid.innerHTML = "";
       grid.style.gridTemplateColumns = "";
       grid.style.gridTemplateRows = "";
-      beginParticipantAssignment();
+      beginParticipantAssignment(spec.total);
 
       if (spec.mode === "focus") {
         renderFocusLayout(grid, spec.total, layoutCode);
@@ -1439,6 +1621,7 @@
 
       activeThumb = thumb;
       setActiveThumb(thumb);
+      grid.dataset.layoutCode = layoutCode;
       syncScreenParticipantOrder(grid);
 
       document.dispatchEvent(
@@ -1452,10 +1635,29 @@
       );
 
       if (syncUpstream) {
-        void syncConferenceMosaic(layoutCode).catch(function (error) {
-          console.error("Cannot sync conference mosaic:", error);
-        });
+        scheduleConferenceMosaicSync(layoutCode);
       }
+    }
+
+    function requestRenderFromThumb(thumb, options) {
+      pendingRenderPayload = {
+        thumb: thumb,
+        options: options || {},
+      };
+
+      if (pendingRenderFrameId) {
+        return;
+      }
+
+      pendingRenderFrameId = window.requestAnimationFrame(function () {
+        pendingRenderFrameId = 0;
+        const payload = pendingRenderPayload;
+        pendingRenderPayload = null;
+        if (!payload || !payload.thumb) {
+          return;
+        }
+        renderFromThumb(payload.thumb, payload.options);
+      });
     }
 
     thumbs.forEach(function (thumb) {
@@ -1463,13 +1665,13 @@
       thumb.setAttribute("role", "button");
 
       thumb.addEventListener("click", function () {
-        renderFromThumb(thumb, { syncUpstream: true });
+        requestRenderFromThumb(thumb, { syncUpstream: true });
       });
 
       thumb.addEventListener("keydown", function (event) {
         if (event.key !== "Enter" && event.key !== " ") return;
         event.preventDefault();
-        renderFromThumb(thumb, { syncUpstream: true });
+        requestRenderFromThumb(thumb, { syncUpstream: true });
       });
     });
 
@@ -1483,14 +1685,6 @@
     );
     if (participantTableBody && !participantTableBody.dataset.layoutSyncBound) {
       participantTableBody.dataset.layoutSyncBound = "1";
-      const observer = new MutationObserver(function () {
-        enableParticipantRowDrag();
-      });
-      observer.observe(participantTableBody, {
-        childList: true,
-        subtree: true,
-        characterData: true,
-      });
     }
 
     enableParticipantRowDrag();
@@ -1500,6 +1694,11 @@
       participantCursor = 0;
       initialParticipantOrder = [];
       pendingMosaicRequestId = 0;
+      pendingMosaicLayoutCode = "";
+      if (pendingMosaicSyncTimer) {
+        window.clearTimeout(pendingMosaicSyncTimer);
+        pendingMosaicSyncTimer = null;
+      }
       clearGridParticipantLabels(grid);
     });
 

@@ -7,7 +7,7 @@
     <title>Vinteo RMX Manager</title>
     <link
       rel="stylesheet"
-      href="{% static 'css/dashboard.css' %}?v=20260319-12"
+      href="{% static 'css/dashboard.css' %}?v=20260323-21"
     />
     <link
       rel="stylesheet"
@@ -15,7 +15,7 @@
     />
     <link
       rel="stylesheet"
-      href="{% static 'css/participant.css' %}?v=20260319-8"
+      href="{% static 'css/participant.css' %}?v=20260323-11"
     />
   </head>
   <body>
@@ -133,186 +133,12 @@
                             />
                           </svg>
                         </button>
-                        <button
-                          type="button"
-                          class="address-icon-btn"
-                          title="Import address book"
-                          aria-label="Import address book"
-                        >
-                          <svg viewBox="0 0 24 24" aria-hidden="true">
-                            <path
-                              d="M11 3a1 1 0 0 1 2 0v8.59l2.3-2.3a1 1 0 1 1 1.4 1.42l-4 3.99a1 1 0 0 1-1.4 0l-4-3.99a1 1 0 1 1 1.4-1.42l2.3 2.3zM4 16a2 2 0 0 1 2-2h2.5a1 1 0 0 1 0 2H6v4h12v-4h-2.5a1 1 0 1 1 0-2H18a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"
-                            />
-                          </svg>
-                        </button>
-                        <button
-                          type="button"
-                          class="address-icon-btn is-danger"
-                          title="Export address book"
-                          aria-label="Export address book"
-                        >
-                          <svg viewBox="0 0 24 24" aria-hidden="true">
-                            <path
-                              d="M4 16a2 2 0 0 1 2-2h2.5a1 1 0 0 1 0 2H6v4h12v-4h-2.5a1 1 0 1 1 0-2H18a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm8-13a1 1 0 0 1 1 1v8.59l2.3-2.3a1 1 0 0 1 1.4 1.42l-4 3.99a1 1 0 0 1-1.4 0l-4-3.99a1 1 0 1 1 1.4-1.42l2.3 2.3V4a1 1 0 0 1 1-1z"
-                            />
-                          </svg>
-                        </button>
                       </div>
                     </div>
                     <div
                       class="box-body scroll-list sync-panel-body participant-list-body participant-list-top"
                     >
-                      <div class="address-tree" role="tree">
-                        <details class="address-group" open>
-                          <summary class="address-node group">
-                            <span
-                              class="address-caret"
-                              aria-hidden="true"
-                            ></span>
-                            <span
-                              class="address-folder"
-                              aria-hidden="true"
-                            ></span>
-                            <span class="address-label"
-                              >Vinteo Core Cluster</span
-                            >
-                          </summary>
-                          <div class="address-children">
-                            <details class="address-group" open>
-                              <summary class="address-node group">
-                                <span
-                                  class="address-caret"
-                                  aria-hidden="true"
-                                ></span>
-                                <span
-                                  class="address-folder"
-                                  aria-hidden="true"
-                                ></span>
-                                <span class="address-label">Management</span>
-                              </summary>
-                              <ul class="address-list">
-                                <li class="address-node participant">
-                                  <span
-                                    class="address-file"
-                                    aria-hidden="true"
-                                  ></span>
-                                  <span class="address-label"
-                                    >Nguyen Minh Anh</span
-                                  >
-                                </li>
-                                <li class="address-node participant">
-                                  <span
-                                    class="address-file"
-                                    aria-hidden="true"
-                                  ></span>
-                                  <span class="address-label"
-                                    >Tran Gia Bao</span
-                                  >
-                                </li>
-                                <li class="address-node participant">
-                                  <span
-                                    class="address-file"
-                                    aria-hidden="true"
-                                  ></span>
-                                  <span class="address-label">Le Thu Ha</span>
-                                </li>
-                              </ul>
-                            </details>
-
-                            <details class="address-group" open>
-                              <summary class="address-node group">
-                                <span
-                                  class="address-caret"
-                                  aria-hidden="true"
-                                ></span>
-                                <span
-                                  class="address-folder"
-                                  aria-hidden="true"
-                                ></span>
-                                <span class="address-label">Operations</span>
-                              </summary>
-                              <ul class="address-list">
-                                <li class="address-node participant">
-                                  <span
-                                    class="address-file"
-                                    aria-hidden="true"
-                                  ></span>
-                                  <span class="address-label"
-                                    >Pham Quoc Dat</span
-                                  >
-                                </li>
-                                <li class="address-node participant">
-                                  <span
-                                    class="address-file"
-                                    aria-hidden="true"
-                                  ></span>
-                                  <span class="address-label">Vo Duc Nam</span>
-                                </li>
-                              </ul>
-                            </details>
-                          </div>
-                        </details>
-
-                        <details class="address-group" open>
-                          <summary class="address-node group">
-                            <span
-                              class="address-caret"
-                              aria-hidden="true"
-                            ></span>
-                            <span
-                              class="address-folder"
-                              aria-hidden="true"
-                            ></span>
-                            <span class="address-label">APAC Sales</span>
-                          </summary>
-                          <ul class="address-list">
-                            <li class="address-node participant">
-                              <span
-                                class="address-file"
-                                aria-hidden="true"
-                              ></span>
-                              <span class="address-label">Hoang Kim Ngan</span>
-                            </li>
-                            <li class="address-node participant">
-                              <span
-                                class="address-file"
-                                aria-hidden="true"
-                              ></span>
-                              <span class="address-label">Bui Anh Tuan</span>
-                            </li>
-                          </ul>
-                        </details>
-
-                        <details class="address-group">
-                          <summary class="address-node group">
-                            <span
-                              class="address-caret"
-                              aria-hidden="true"
-                            ></span>
-                            <span
-                              class="address-folder"
-                              aria-hidden="true"
-                            ></span>
-                            <span class="address-label">External Partners</span>
-                          </summary>
-                          <ul class="address-list">
-                            <li class="address-node participant">
-                              <span
-                                class="address-file"
-                                aria-hidden="true"
-                              ></span>
-                              <span class="address-label">Partner Site 01</span>
-                            </li>
-                            <li class="address-node participant">
-                              <span
-                                class="address-file"
-                                aria-hidden="true"
-                              ></span>
-                              <span class="address-label">Partner Site 02</span>
-                            </li>
-                          </ul>
-                        </details>
-                      </div>
+                      <div class="address-tree" role="tree"></div>
                     </div>
                   </section>
                 </div>
@@ -382,10 +208,10 @@
         aria-describedby="kick-confirm-message"
       >
         <h4 id="kick-confirm-title" class="confirm-modal-title">
-          Confirm Kick
+          Confirm Disconnect
         </h4>
         <p id="kick-confirm-message" class="confirm-modal-message">
-          Are you sure you want to kick this participant out of this meeting?
+          Are you sure you want to disconnect this participant from this meeting?
         </p>
         <div class="confirm-modal-actions">
           <button type="button" class="confirm-modal-btn" data-kick-cancel>
@@ -396,7 +222,7 @@
             class="confirm-modal-btn danger"
             data-kick-confirm
           >
-            Kick
+            Disconnect
           </button>
         </div>
       </div>
@@ -428,6 +254,84 @@
             Leave
           </button>
         </div>
+      </div>
+    </div>
+    <div class="confirm-modal" id="participant-fast-call-modal" hidden>
+      <div class="confirm-modal-backdrop" data-fast-call-close></div>
+      <div
+        class="confirm-modal-card participant-fast-call-modal-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="participant-fast-call-title"
+      >
+        <button
+          type="button"
+          class="conference-modal-close"
+          data-fast-call-close
+          aria-label="Close dialing dialog"
+        >
+          x
+        </button>
+        <h4 id="participant-fast-call-title" class="confirm-modal-title">
+          Dialing
+        </h4>
+        <form id="participant-fast-call-form" class="participant-fast-call-form">
+          <div class="participant-fast-call-body">
+            <label class="participant-fast-call-field participant-fast-call-field-wide">
+              <span>Number</span>
+              <div class="participant-fast-call-number-row">
+                <select
+                  name="type"
+                  class="participant-fast-call-type"
+                  aria-label="Call type"
+                >
+                  <option value="SIP">SIP</option>
+                  <option value="H323">H.323</option>
+                </select>
+                <input
+                  name="number"
+                  type="text"
+                  maxlength="120"
+                  autocomplete="off"
+                  placeholder="Enter a number, IP address or URI"
+                  aria-label="Number to call"
+                  required
+                />
+                <button
+                  type="submit"
+                  class="participant-fast-call-submit"
+                  title="Call"
+                  aria-label="Call"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                      d="M6.54 5a1.5 1.5 0 0 1 1.4.95l1.2 3a1.5 1.5 0 0 1-.35 1.59l-1.06 1.06a14.1 14.1 0 0 0 4.67 4.67l1.06-1.06a1.5 1.5 0 0 1 1.59-.35l3 1.2A1.5 1.5 0 0 1 19 17.46V20a1 1 0 0 1-1 1C10.82 21 3 13.18 3 4a1 1 0 0 1 1-1z"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </label>
+            <label class="participant-fast-call-field participant-fast-call-field-wide">
+              <span>Resolution</span>
+              <select name="resolution" aria-label="Resolution"></select>
+            </label>
+            <div class="participant-fast-call-grid">
+              <label class="participant-fast-call-field">
+                <span>Bandwidth</span>
+                <select name="speed" aria-label="Bandwidth"></select>
+              </label>
+              <label class="participant-fast-call-field">
+                <span>FPS</span>
+                <select name="fps" aria-label="FPS"></select>
+              </label>
+            </div>
+          </div>
+          <div class="confirm-modal-actions participant-fast-call-actions">
+            <button type="button" class="confirm-modal-btn" data-fast-call-close>
+              Close
+            </button>
+          </div>
+        </form>
       </div>
     </div>
 
@@ -551,15 +455,15 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
     <script src="{% static 'js/api-axios.js' %}?v=20260318-1"></script>
-    <script src="{% static 'js/layout-manager.js' %}?v=20260319-15"></script>
+    <script src="{% static 'js/layout-manager.js' %}?v=20260323-18"></script>
     <script src="{% static 'js/popup-manager.js' %}?v=20260319-1"></script>
-    <script src="{% static 'js/address-book-manager.js' %}?v=20260316-2"></script>
+    <script src="{% static 'js/address-book-manager.js' %}?v=20260323-7"></script>
     <script src="{% static 'js/conference/conference-manager.js' %}?v=20260319-3"></script>
-    <script src="{% static 'js/participant/participant-manager.js' %}?v=20260319-12"></script>
+    <script src="{% static 'js/participant/participant-manager.js' %}?v=20260323-16"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.18/dist/hls.min.js"></script>
-    <script src="{% static 'js/stage-stream-manager.js' %}?v=20260319-13"></script>
-    <script src="{% static 'js/participant/participant-actions.js' %}?v=20260321-1"></script>
+    <script src="{% static 'js/stage-stream-manager.js' %}?v=20260323-24"></script>
+    <script src="{% static 'js/participant/participant-actions.js' %}?v=20260323-6"></script>
     <script src="{% static 'js/participant/participant-context-menu.js' %}?v=20260321-1"></script>
-    <script src="{% static 'js/dashboard/dashboard-bootstrap.js' %}?v=20260321-1"></script>
+    <script src="{% static 'js/dashboard/dashboard-bootstrap.js' %}?v=20260323-3"></script>
   </body>
 </html>

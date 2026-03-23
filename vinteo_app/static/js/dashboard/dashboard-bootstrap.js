@@ -6,6 +6,8 @@
     participantActions.initParticipantMediaToggles || function () {};
   const initKickMemberButtons =
     participantActions.initKickMemberButtons || function () {};
+  const initFastCallButton =
+    participantActions.initFastCallButton || function () {};
   const initParticipantContextMenu =
     participantContextMenu.initParticipantContextMenu || function () {};
 
@@ -288,7 +290,10 @@
         searchEmptyRow = document.createElement("tr");
         searchEmptyRow.className = "participant-empty-row participant-search-empty-row";
         const cell = document.createElement("td");
-        cell.colSpan = 13;
+        const headerCount = table
+          ? table.querySelectorAll("thead th").length
+          : 12;
+        cell.colSpan = headerCount > 0 ? headerCount : 12;
         cell.textContent = "No matched participants";
         searchEmptyRow.appendChild(cell);
         tableBody.appendChild(searchEmptyRow);
@@ -460,6 +465,7 @@
     initLeaveConferenceConfirm();
     initConferenceSearch();
     initParticipantSearch();
+    initFastCallButton();
     if (
       window.DashboardAddressBookManager &&
       typeof window.DashboardAddressBookManager.initAddressBookManager ===

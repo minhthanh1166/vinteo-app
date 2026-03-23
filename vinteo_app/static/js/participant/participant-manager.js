@@ -1,6 +1,7 @@
 (function () {
-  const PARTICIPANT_REFRESH_MS = 5000;
+  const PARTICIPANT_REFRESH_MS = 7000;
   const ACCOUNT_CACHE_TTL_MS = 60000;
+  const PARTICIPANT_DETAILS_CACHE_TTL_MS = 15000;
   let managerInitialized = false;
 
   function escapeHtml(value) {
@@ -306,16 +307,133 @@
 
   function extractParticipantShot(participant) {
     const detail = participant && participant._details ? participant._details : null;
-    const source = detail || participant || {};
-    const shots = Array.isArray(source.shots)
-      ? source.shots
-      : Array.isArray(participant && participant.shots)
-        ? participant.shots
-        : [];
-    if (!shots.length) {
+    const directShotGroups = [
+      detail && Array.isArray(detail.shots) ? detail.shots : null,
+      participant && Array.isArray(participant.shots) ? participant.shots : null,
+    ].filter(Boolean);
+
+    for (let groupIndex = 0; groupIndex < directShotGroups.length; groupIndex += 1) {
+      const group = directShotGroups[groupIndex]
+        .map(function (value) {
+          return String(value || "").trim();
+        })
+        .filter(Boolean);
+      if (!group.length) {
+        continue;
+      }
+
+      const inShot = group.find(function (value) {
+        return /\/in(\?|\/|$)/i.test(value);
+      });
+      if (inShot) {
+        return inShot;
+      }
+
+      return group[0];
+    }
+
+    const roots = [
+      detail,
+      participant,
+      detail && detail.stream,
+      participant && participant.stream,
+    ];
+    const visited = new Set();
+    const candidates = [];
+
+    function scoreCandidate(value, keyHint) {
+      const text = String(value || "").toLowerCase();
+      const key = String(keyHint || "").toLowerCase();
+      let score = 0;
+
+      if (/\.(png|webp)(\?|$)/i.test(text)) {
+        score += 2;
+      }
+      if (/(\buhd\b|4k|2160|1440|1080|fullhd|fhd|720)/i.test(text)) {
+        score += 8;
+      }
+      if (/(origin|original|source|full|large|hq|high|best|max)/i.test(text)) {
+        score += 5;
+      }
+      if (/(origin|original|source|full|large|hq|high|best|max)/i.test(key)) {
+        score += 5;
+      }
+      if (/(shot|screenshot|snapshot|preview|image|frame)/i.test(key)) {
+        score += 2;
+      }
+      if (/(thumb|thumbnail|tiny|small|icon|low|lq|mini|avatar)/i.test(text)) {
+        score -= 8;
+      }
+      if (/(thumb|thumbnail|tiny|small|icon|low|lq|mini|avatar)/i.test(key)) {
+        score -= 8;
+      }
+      if (/\/in(\?|\/|$)/i.test(text)) {
+        score += 6;
+      }
+      if (/\/out(\?|\/|$)/i.test(text)) {
+        score -= 6;
+      }
+
+      score += Math.min(text.length / 180, 2);
+      return score;
+    }
+
+    function pushCandidate(value, keyHint) {
+      const text = String(value || "").trim();
+      if (!text) return;
+      if (!/^\w+:\/\//i.test(text) && !text.includes("/")) return;
+      if (visited.has(text)) return;
+      visited.add(text);
+      candidates.push({
+        value: text,
+        score: scoreCandidate(text, keyHint),
+      });
+    }
+
+    function walk(node, keyHint) {
+      if (node === null || node === undefined) {
+        return;
+      }
+
+      if (typeof node === "string") {
+        if (/(shot|screenshot|preview|image|snapshot|thumb)/i.test(String(keyHint || ""))) {
+          pushCandidate(node, keyHint);
+        }
+        return;
+      }
+
+      if (Array.isArray(node)) {
+        node.forEach(function (item) {
+          walk(item, keyHint);
+        });
+        return;
+      }
+
+      if (typeof node !== "object") {
+        return;
+      }
+
+      Object.keys(node).forEach(function (key) {
+        walk(node[key], key);
+      });
+    }
+
+    roots.forEach(function (root) {
+      walk(root, "");
+    });
+
+    if (!candidates.length) {
       return "";
     }
-    return String(shots[0] || "").trim();
+
+    candidates.sort(function (a, b) {
+      if (a.score !== b.score) {
+        return b.score - a.score;
+      }
+      return b.value.length - a.value.length;
+    });
+
+    return candidates[0].value || "";
   }
 
   function createMediaCell(mediaType, isOn) {
@@ -385,7 +503,7 @@
     if (!tableBody) return;
     tableBody.innerHTML =
       '<tr class="participant-empty-row">' +
-      '<td colspan="13">' +
+      '<td colspan="12">' +
       escapeHtml(message) +
       "</td>" +
       "</tr>";
@@ -426,7 +544,6 @@
             "-",
         ).trim();
         const roleValue = inferRole(source);
-        const networkValue = inferNetwork(participant);
         const ipValue = extractIp(participant);
         const typeValue =
           String(
@@ -454,7 +571,6 @@
           createTextCell(nameValue) +
           createTextCell(status.text, "state " + status.className) +
           createTextCell(roleValue) +
-          createTextCell(networkValue) +
           createTextCell(ipValue) +
           createTextCell(typeValue) +
           createTextCell(sipValue) +
@@ -517,6 +633,39 @@
     return "";
   }
 
+  function shouldFetchParticipantDetails(participant) {
+    if (!participant || typeof participant !== "object") {
+      return true;
+    }
+
+    const participantNumber = String(
+      participant.number || participant.id || "",
+    ).trim();
+    const hasDisplayInfo = Boolean(
+      String(
+        participant.description ||
+          participant.displayName ||
+          participant.watermark ||
+          participantNumber,
+      ).trim(),
+    );
+    const hasParams =
+      participant.params &&
+      typeof participant.params === "object" &&
+      Object.keys(participant.params).length > 0;
+    const hasStatusFields =
+      typeof participant.isOnline === "boolean" ||
+      typeof participant.isDisconnected === "boolean" ||
+      participant.registered !== undefined;
+    const hasShot = Boolean(extractParticipantShot(participant));
+
+    if (!hasShot) {
+      return true;
+    }
+
+    return !(participantNumber && hasDisplayInfo && hasParams && hasStatusFields);
+  }
+
   async function enrichParticipants(
     apiClient,
     conferenceNumber,
@@ -537,23 +686,60 @@
       options && options.pendingAccountRequests
         ? options.pendingAccountRequests
         : new Map();
+    const detailCache = options && options.detailCache ? options.detailCache : new Map();
+    const pendingDetailRequests =
+      options && options.pendingDetailRequests
+        ? options.pendingDetailRequests
+        : new Map();
     const endpointState = options && options.endpointState ? options.endpointState : {};
 
     async function getParticipantDetails(participantNumber) {
-      if (!participantNumber) {
+      if (!participantNumber || endpointState.participantForbidden) {
         return null;
       }
-      try {
-        const response = await apiClient.get(
-          "/api/v1/participant/" +
-            encodeURIComponent(conferenceNumber) +
-            "/" +
-            encodeURIComponent(participantNumber),
-        );
-        return extractParticipantDetailsPayload(response.data);
-      } catch (error) {
-        return null;
+
+      const detailCacheKey =
+        encodeURIComponent(conferenceNumber) + "::" + encodeURIComponent(participantNumber);
+      const cached = detailCache.get(detailCacheKey);
+      if (cached && cached.expiresAt > Date.now()) {
+        return cached.value;
       }
+
+      if (pendingDetailRequests.has(detailCacheKey)) {
+        return pendingDetailRequests.get(detailCacheKey);
+      }
+
+      const requestPromise = (async function () {
+        try {
+          const response = await apiClient.get(
+            "/api/v1/participant/" +
+              encodeURIComponent(conferenceNumber) +
+              "/" +
+              encodeURIComponent(participantNumber),
+          );
+          const details = extractParticipantDetailsPayload(response.data);
+          detailCache.set(detailCacheKey, {
+            value: details,
+            expiresAt: Date.now() + PARTICIPANT_DETAILS_CACHE_TTL_MS,
+          });
+          return details;
+        } catch (error) {
+          const status = error && error.response ? Number(error.response.status) : 0;
+          if (status === 401 || status === 403) {
+            endpointState.participantForbidden = true;
+          }
+          detailCache.set(detailCacheKey, {
+            value: null,
+            expiresAt: Date.now() + Math.floor(PARTICIPANT_DETAILS_CACHE_TTL_MS / 3),
+          });
+          return null;
+        } finally {
+          pendingDetailRequests.delete(detailCacheKey);
+        }
+      })();
+
+      pendingDetailRequests.set(detailCacheKey, requestPromise);
+      return requestPromise;
     }
 
     async function getAccountDetails(accountKey) {
@@ -607,7 +793,10 @@
         }
 
         const participantNumber = getParticipantNumberForPath(participant);
-        const details = await getParticipantDetails(participantNumber);
+        let details = null;
+        if (participantNumber && shouldFetchParticipantDetails(participant)) {
+          details = await getParticipantDetails(participantNumber);
+        }
         const merged = Object.assign({}, participant, {
           _details: details || null,
         });
@@ -650,8 +839,11 @@
     let refreshTimer = null;
     const accountCache = new Map();
     const pendingAccountRequests = new Map();
+    const participantDetailCache = new Map();
+    const pendingDetailRequests = new Map();
     const endpointState = {
       accountForbidden: false,
+      participantForbidden: false,
     };
 
     function resetRefreshTimer() {
@@ -688,32 +880,61 @@
       }
 
       const requestId = ++latestRequestId;
+      const endpoint =
+        "/api/v1/participants/" + encodeURIComponent(normalizedConferenceNumber);
+
+      async function fetchParticipantsResponse(variant) {
+        if (!variant || !variant.params) {
+          return apiClient.get(endpoint);
+        }
+        return apiClient.get(endpoint, {
+          params: variant.params,
+        });
+      }
 
       try {
-        const response = await apiClient.get(
-          "/api/v1/participants/" + encodeURIComponent(normalizedConferenceNumber),
+        const requestVariants = [
+          {
+            params: {
+              limit: 200,
+              offset: 0,
+              withScreenshots: true,
+            },
+          },
           {
             params: {
               limit: 200,
               offset: 0,
             },
           },
-        );
+          null,
+        ];
 
-        if (requestId !== latestRequestId) {
-          return;
+        let participants = [];
+        let lastError = null;
+
+        for (let variantIndex = 0; variantIndex < requestVariants.length; variantIndex += 1) {
+          const variant = requestVariants[variantIndex];
+          try {
+            const response = await fetchParticipantsResponse(variant);
+            if (requestId !== latestRequestId) {
+              return;
+            }
+
+            participants = extractParticipantsPayload(response.data);
+            if (participants.length || variant === null) {
+              break;
+            }
+          } catch (error) {
+            lastError = error;
+            if (variantIndex === requestVariants.length - 1) {
+              throw error;
+            }
+          }
         }
 
-        let participants = extractParticipantsPayload(response.data);
-
-        if (!participants.length) {
-          const retryResponse = await apiClient.get(
-            "/api/v1/participants/" + encodeURIComponent(normalizedConferenceNumber),
-          );
-          if (requestId !== latestRequestId) {
-            return;
-          }
-          participants = extractParticipantsPayload(retryResponse.data);
+        if (!participants.length && lastError) {
+          throw lastError;
         }
 
         participants = await enrichParticipants(
@@ -726,6 +947,8 @@
             },
             accountCache: accountCache,
             pendingAccountRequests: pendingAccountRequests,
+            detailCache: participantDetailCache,
+            pendingDetailRequests: pendingDetailRequests,
             endpointState: endpointState,
           },
         );

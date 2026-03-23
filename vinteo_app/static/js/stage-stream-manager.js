@@ -1,8 +1,9 @@
 ﻿(function () {
   const STREAM_REFRESH_MS = 20000;
-  const PREVIEW_REFRESH_MS = 4000;
+  const PREVIEW_REFRESH_MS = 800;
   const WEBCAST_SETTINGS_SYNC_TTL_MS = 120000;
   const HLS_PLAY_TIMEOUT_MS = 10000;
+  const LAYOUT_STREAM_RELOAD_DEBOUNCE_MS = 120;
 
   let currentConference = "";
   let currentStreamSrc = "";
@@ -10,6 +11,8 @@
   let activeRequestId = 0;
   let refreshTimer = null;
   let previewTimer = null;
+  let layoutReloadTimer = null;
+  let layoutTileSyncFrameId = 0;
   let rowClickBound = false;
   let hlsInstance = null;
   let currentRenderMode = "none";
@@ -108,43 +111,12 @@
       return "";
     }
 
-    const tileLabel = normalizeLabel(getPrimaryTileLabel());
-    if (!tileLabel || tileLabel === "no participant") {
-      return "";
-    }
-
-    const rows = Array.from(
-      document.querySelectorAll(".active-conferences-scroll tbody tr"),
-    ).filter(function (row) {
-      return !row.classList.contains("participant-empty-row");
-    });
-
-    const matchedRow = rows.find(function (row) {
-      const cells = row.children || [];
-      const idCell = cells[0] || null;
-      const nameCell = cells[1] || null;
-
-      const idCandidates = [
-        row.dataset.participantNumber,
-        row.dataset.participantId,
-        idCell ? idCell.getAttribute("title") : "",
-        idCell ? idCell.textContent : "",
-      ];
-      const nameCandidates = [
-        nameCell ? nameCell.getAttribute("title") : "",
-        nameCell ? nameCell.textContent : "",
-      ];
-
-      return idCandidates.concat(nameCandidates).some(function (candidate) {
-        return normalizeLabel(candidate) === tileLabel;
-      });
-    });
-
+    const matchedRow = resolveRowByTileLabel(getPrimaryTileLabel());
     if (matchedRow) {
       return String(matchedRow.dataset.participantShot || "").trim();
     }
 
-    const fallbackRow = rows.find(function (row) {
+    const fallbackRow = getRenderableParticipantRows().find(function (row) {
       return Boolean(String(row.dataset.participantShot || "").trim());
     });
 
@@ -153,6 +125,28 @@
     }
 
     return String(fallbackRow.dataset.participantShot || "").trim();
+  }
+
+  function resolvePrimaryTileParticipantCandidates() {
+    if (!isSingleTileLayout()) {
+      return [];
+    }
+
+    const matchedRow = resolveRowByTileLabel(getPrimaryTileLabel());
+    if (matchedRow) {
+      return getRowIdentityCandidates(matchedRow);
+    }
+
+    const fallbackRow = getRenderableParticipantRows().find(function (row) {
+      return Boolean(
+        String(row.dataset.participantNumber || row.dataset.participantId || "").trim(),
+      );
+    });
+    if (!fallbackRow) {
+      return [];
+    }
+
+    return getRowIdentityCandidates(fallbackRow);
   }
 
   function getRenderableParticipantRows() {
@@ -227,13 +221,18 @@
 
   function resolveBestPreviewSource(previewSrc) {
     const directPreview = String(previewSrc || "").trim();
+    const participantShot = resolvePrimaryTileParticipantShot();
+
     if (directPreview) {
       return directPreview;
     }
 
-    const participantShot = resolvePrimaryTileParticipantShot();
     if (participantShot) {
       return participantShot;
+    }
+
+    if (currentPreviewSrc) {
+      return currentPreviewSrc;
     }
 
     return "";
@@ -373,8 +372,11 @@
           return img;
         })();
 
-      const divider = baseShotSrc.includes("?") ? "&" : "?";
-      shotImg.src = baseShotSrc + divider + "_=" + Date.now();
+      shotImg.classList.remove("is-low-source");
+      shotImg.style.removeProperty("--shot-width");
+      shotImg.style.removeProperty("--shot-height");
+
+      shotImg.src = buildRefreshableImageUrl(baseShotSrc);
       tile.classList.add("has-live-media");
     });
 
@@ -442,6 +444,20 @@
     if (refreshTimer) {
       window.clearInterval(refreshTimer);
       refreshTimer = null;
+    }
+  }
+
+  function stopLayoutReloadTimer() {
+    if (layoutReloadTimer) {
+      window.clearTimeout(layoutReloadTimer);
+      layoutReloadTimer = null;
+    }
+  }
+
+  function stopLayoutTileSyncFrame() {
+    if (layoutTileSyncFrameId) {
+      window.cancelAnimationFrame(layoutTileSyncFrameId);
+      layoutTileSyncFrameId = 0;
     }
   }
 
@@ -586,19 +602,62 @@
   }
 
   function extractPreviewSrc(payload) {
-    return normalizeUpstreamUrl(
-      searchStringDeep(payload, function (value, key) {
-        const text = String(value || "")
-          .trim()
-          .toLowerCase();
-        const normalizedKey = String(key || "").toLowerCase();
-        return (
-          normalizedKey.includes("preview") ||
+    const bestMatch = findBestStringDeep(payload, function (value, key) {
+      const text = String(value || "")
+        .trim()
+        .toLowerCase();
+      const normalizedKey = String(key || "").toLowerCase();
+
+      return (
+        !text.includes(".m3u8") &&
+        (normalizedKey.includes("preview") ||
           text.includes("/stream/preview/") ||
-          text.includes("/screenshot/")
-        );
-      }),
-    );
+          text.includes("/screenshot/"))
+      );
+    });
+
+    return normalizeUpstreamUrl(bestMatch);
+  }
+
+  function extractParticipantPreviewSrc(payload) {
+    const directPreview = extractPreviewSrc(payload);
+    if (directPreview) {
+      return directPreview;
+    }
+
+    const bestMatch = findBestStringDeep(payload, function (value, key) {
+      const text = String(value || "")
+        .trim()
+        .toLowerCase();
+      const normalizedKey = String(key || "").toLowerCase();
+      if (!text || text.startsWith("sip/")) {
+        return false;
+      }
+
+      const keyMatched =
+        normalizedKey.includes("preview") ||
+        normalizedKey.includes("shot") ||
+        normalizedKey.includes("screenshot") ||
+        normalizedKey.includes("image") ||
+        normalizedKey.includes("snapshot") ||
+        normalizedKey.includes("thumb");
+
+      const valueMatched =
+        text.includes("/preview/") ||
+        text.includes("/screenshot/") ||
+        text.includes("/snapshot/") ||
+        text.includes("/shot/") ||
+        text.includes("/image/") ||
+        /\.(png|jpe?g|webp|gif|bmp)(\?|$)/i.test(text);
+
+      if (!keyMatched && !valueMatched) {
+        return false;
+      }
+
+      return !text.includes(".m3u8");
+    });
+
+    return normalizeUpstreamUrl(bestMatch);
   }
 
   function extractStreamsCollection(payload) {
@@ -678,6 +737,86 @@
     }
 
     return candidates;
+  }
+
+  function buildPreviewSourceCandidates(previewSrc) {
+    const candidates = [];
+    const direct = normalizeUpstreamUrl(previewSrc);
+    const proxied = normalizeToProxyApiPath(previewSrc);
+    const directText = String(direct || "");
+    const shouldPreferProxy = directText.startsWith("/");
+
+    if (shouldPreferProxy && proxied) {
+      candidates.push(proxied);
+    }
+    if (direct) {
+      candidates.push(direct);
+    }
+    if (proxied && !candidates.includes(proxied)) {
+      candidates.push(proxied);
+    }
+
+    return candidates;
+  }
+
+  function buildRefreshableImageUrl(sourceUrl) {
+    const base = String(sourceUrl || "").trim();
+    if (!base) {
+      return "";
+    }
+
+    if (!base.includes("?")) {
+      return base + "?_=" + Date.now();
+    }
+
+    return base + "&_=" + Date.now();
+  }
+
+  async function resolveConferencePreviewFromParticipants(conferenceNumber) {
+    const apiClient = getApiClient();
+    if (!apiClient) {
+      return "";
+    }
+
+    const normalizedConference = String(conferenceNumber || "").trim();
+    if (!normalizedConference) {
+      return "";
+    }
+
+    const endpoint = "/api/v1/participants/" + encodeURIComponent(normalizedConference);
+    const variants = [
+      {
+        params: {
+          withScreenshots: true,
+          limit: 200,
+          offset: 0,
+        },
+      },
+      {
+        params: {
+          limit: 200,
+          offset: 0,
+        },
+      },
+      null,
+    ];
+
+    for (let index = 0; index < variants.length; index += 1) {
+      const variant = variants[index];
+      try {
+        const response = variant
+          ? await apiClient.get(endpoint, { params: variant.params })
+          : await apiClient.get(endpoint);
+        const preview = extractParticipantPreviewSrc(response.data);
+        if (preview) {
+          return preview;
+        }
+      } catch (_error) {
+        // Continue fallback chain.
+      }
+    }
+
+    return "";
   }
 
   async function syncWebcastSettings(conferenceNumber) {
@@ -806,6 +945,162 @@
     };
   }
 
+  async function resolveParticipantPreviewFromApi(
+    conferenceNumber,
+    participantCandidates,
+  ) {
+    const apiClient = getApiClient();
+    if (!apiClient) {
+      return "";
+    }
+
+    const normalizedConference = String(conferenceNumber || "").trim();
+    if (!normalizedConference) {
+      return "";
+    }
+
+    const uniqueCandidates = Array.from(
+      new Set(
+        (Array.isArray(participantCandidates) ? participantCandidates : [])
+          .map(function (value) {
+            return String(value || "").trim();
+          })
+          .filter(Boolean),
+      ),
+    );
+
+    for (let index = 0; index < uniqueCandidates.length; index += 1) {
+      const participant = uniqueCandidates[index];
+      const participantPath = encodeURIComponent(participant);
+      const conferencePath = encodeURIComponent(normalizedConference);
+
+      try {
+        const detailResponse = await apiClient.get(
+          "/api/v1/participant/" + conferencePath + "/" + participantPath,
+        );
+        const detailPreview = extractParticipantPreviewSrc(detailResponse.data);
+        if (detailPreview) {
+          return detailPreview;
+        }
+      } catch (_error) {
+        // Continue fallback chain for this participant.
+      }
+
+      try {
+        const settingsResponse = await apiClient.get(
+          "/api/v1/participant/" + conferencePath + "/" + participantPath + "/settings",
+        );
+        const settingsPreview = extractParticipantPreviewSrc(settingsResponse.data);
+        if (settingsPreview) {
+          return settingsPreview;
+        }
+      } catch (_error) {
+        // Continue with next participant.
+      }
+    }
+
+    return "";
+  }
+
+  function scorePreviewCandidate(value, keyHint) {
+    const text = String(value || "").toLowerCase();
+    const key = String(keyHint || "").toLowerCase();
+    let score = 0;
+
+    if (/\.(png|webp)(\?|$)/i.test(text)) {
+      score += 2;
+    }
+    if (/(\buhd\b|4k|2160|1440|1080|fullhd|fhd|720)/i.test(text)) {
+      score += 8;
+    }
+    if (/(origin|original|source|full|large|hq|high|best|max)/i.test(text)) {
+      score += 5;
+    }
+    if (/(origin|original|source|full|large|hq|high|best|max)/i.test(key)) {
+      score += 5;
+    }
+    if (/(preview|shot|screenshot|snapshot|image|frame)/i.test(key)) {
+      score += 2;
+    }
+    if (/(thumb|thumbnail|tiny|small|icon|low|lq|mini|avatar)/i.test(text)) {
+      score -= 8;
+    }
+    if (/(thumb|thumbnail|tiny|small|icon|low|lq|mini|avatar)/i.test(key)) {
+      score -= 8;
+    }
+    if (/\/in(\?|\/|$)/i.test(text)) {
+      score += 6;
+    }
+    if (/\/out(\?|\/|$)/i.test(text)) {
+      score -= 6;
+    }
+
+    score += Math.min(text.length / 180, 2);
+    return score;
+  }
+
+  function findBestStringDeep(node, matcher) {
+    const byValue = new Map();
+
+    function walk(value, keyHint) {
+      if (value === null || value === undefined) {
+        return;
+      }
+
+      if (typeof value === "string") {
+        if (!matcher(value, keyHint)) {
+          return;
+        }
+
+        const text = String(value || "").trim();
+        if (!text) {
+          return;
+        }
+
+        const score = scorePreviewCandidate(text, keyHint);
+        const cached = byValue.get(text);
+        if (!cached || score > cached.score) {
+          byValue.set(text, {
+            value: text,
+            score: score,
+          });
+        }
+        return;
+      }
+
+      if (Array.isArray(value)) {
+        value.forEach(function (item) {
+          walk(item, keyHint);
+        });
+        return;
+      }
+
+      if (typeof value !== "object") {
+        return;
+      }
+
+      Object.keys(value).forEach(function (key) {
+        walk(value[key], key);
+      });
+    }
+
+    walk(node, "");
+
+    const candidates = Array.from(byValue.values());
+    if (!candidates.length) {
+      return "";
+    }
+
+    candidates.sort(function (a, b) {
+      if (a.score !== b.score) {
+        return b.score - a.score;
+      }
+      return b.value.length - a.value.length;
+    });
+
+    return candidates[0].value || "";
+  }
+
   function canPlayHlsNatively() {
     if (!videoEl || typeof videoEl.canPlayType !== "function") {
       return false;
@@ -817,52 +1112,109 @@
     ensureMediaElements();
     removeTileShotElements();
     stopPreviewLoop();
-    destroyHls();
 
-    if (videoEl) {
-      videoEl.pause();
-      videoEl.removeAttribute("src");
-      videoEl.load();
-      if (videoEl.parentElement) {
-        videoEl.parentElement.removeChild(videoEl);
+    const previewCandidates = [];
+    const sourceInputs = Array.isArray(previewSrc)
+      ? previewSrc
+      : [resolveBestPreviewSource(previewSrc)];
+
+    sourceInputs.forEach(function (source) {
+      const sourceCandidates = buildPreviewSourceCandidates(source);
+      sourceCandidates.forEach(function (candidate) {
+        if (!candidate) {
+          return;
+        }
+        if (!previewCandidates.includes(candidate)) {
+          previewCandidates.push(candidate);
+        }
+      });
+    });
+
+    if (!previewCandidates.length) {
+      setStatus("No preview source for this conference stream.");
+      return false;
+    }
+
+    let previewRevision = 0;
+    let previewCandidateIndex = 0;
+    let hasActivePreviewSurface =
+      currentRenderMode === "preview" &&
+      previewEl &&
+      previewEl.parentElement &&
+      document.contains(previewEl);
+
+    if (currentPreviewSrc) {
+      const persistedIndex = previewCandidates.indexOf(currentPreviewSrc);
+      if (persistedIndex >= 0) {
+        previewCandidateIndex = persistedIndex;
       }
     }
 
-    const preferredPreviewSrc = resolveBestPreviewSource(previewSrc);
-    const basePreviewSrc = normalizeToProxyApiPath(preferredPreviewSrc);
-    if (!basePreviewSrc) {
-      setStatus("No preview source for this conference stream.");
-      return;
+    function activatePreviewSurface() {
+      if (!hasActivePreviewSurface) {
+        destroyHls();
+
+        if (videoEl) {
+          videoEl.pause();
+          videoEl.removeAttribute("src");
+          videoEl.load();
+          if (videoEl.parentElement) {
+            videoEl.parentElement.removeChild(videoEl);
+          }
+        }
+
+        mountIntoPrimaryTile(previewEl);
+        hasActivePreviewSurface = true;
+        return;
+      }
+
+      if (!previewEl.parentElement) {
+        mountIntoPrimaryTile(previewEl);
+      }
     }
 
-    mountIntoPrimaryTile(previewEl);
-
-    let previewRevision = 0;
-
-    function updatePreviewSrc() {
+    function updatePreviewSrc(allowFailover) {
       previewRevision += 1;
       const currentRevision = previewRevision;
-      const divider = basePreviewSrc.includes("?") ? "&" : "?";
-      const nextSrc = basePreviewSrc + divider + "_=" + Date.now();
+      const basePreviewSrc = previewCandidates[previewCandidateIndex] || "";
+      if (!basePreviewSrc) {
+        return;
+      }
+
+      const nextSrc = buildRefreshableImageUrl(basePreviewSrc);
+
       const loader = new Image();
       loader.onload = function () {
         if (currentRevision !== previewRevision) {
           return;
         }
+        activatePreviewSurface();
         previewEl.src = nextSrc;
+        currentPreviewSrc = basePreviewSrc;
+        currentStreamSrc = "";
+        currentRenderMode = "preview";
+        setStatus(statusText || "Live preview mode");
       };
       loader.onerror = function () {
-        // Keep the current frame when next frame fails.
+        if (currentRevision !== previewRevision) {
+          return;
+        }
+        if (previewCandidates.length > 1) {
+          previewCandidateIndex =
+            (previewCandidateIndex + 1) % previewCandidates.length;
+          if (allowFailover) {
+            updatePreviewSrc(false);
+          }
+        }
       };
       loader.src = nextSrc;
     }
 
-    updatePreviewSrc();
-    previewTimer = window.setInterval(updatePreviewSrc, PREVIEW_REFRESH_MS);
-    currentPreviewSrc = basePreviewSrc;
-    currentStreamSrc = "";
-    currentRenderMode = "preview";
-    setStatus(statusText || "Live preview mode");
+    updatePreviewSrc(true);
+    previewTimer = window.setInterval(function () {
+      updatePreviewSrc(true);
+    }, PREVIEW_REFRESH_MS);
+    return true;
   }
 
   async function playVideoStream(streamSrc, previewSrc) {
@@ -874,15 +1226,13 @@
     const streamCandidates = buildStreamSourceCandidates(streamSrc);
     if (!streamCandidates.length) {
       if (preferredPreviewSrc) {
-        playPreview(preferredPreviewSrc);
-        return;
+        return playPreview(preferredPreviewSrc);
       }
       setStatus("No stream source returned.");
-      return;
+      return false;
     }
 
     mountIntoPrimaryTile(videoEl);
-    previewEl.removeAttribute("src");
 
     if (
       currentStreamSrc &&
@@ -891,8 +1241,11 @@
     ) {
       try {
         await videoEl.play();
+        if (previewEl && previewEl.parentElement) {
+          previewEl.parentElement.removeChild(previewEl);
+        }
         setStatus("");
-        return;
+        return true;
       } catch (_error) {
         // Continue to re-attach below.
       }
@@ -1012,27 +1365,30 @@
         currentStreamSrc = candidateSrc;
         currentPreviewSrc = "";
         currentRenderMode = "hls";
+        if (previewEl && previewEl.parentElement) {
+          previewEl.parentElement.removeChild(previewEl);
+        }
         setStatus("");
-        return;
+        return true;
       } catch (error) {
         streamError = error;
       }
     }
 
-    try {
-      if (preferredPreviewSrc) {
-        playPreview(preferredPreviewSrc);
-        return;
-      }
-      throw streamError || new Error("Cannot play HLS stream.");
-    } catch (error) {
-      setStatus(extractErrorMessage(error, "Cannot play HLS stream."));
+    if (preferredPreviewSrc) {
+      return playPreview(preferredPreviewSrc);
     }
+
+    setStatus(
+      extractErrorMessage(streamError, "Cannot play HLS stream."),
+    );
+    return false;
   }
 
   async function loadConferenceStream(conferenceNumber) {
     const normalizedConference = String(conferenceNumber || "").trim();
     currentConference = normalizedConference;
+    stopLayoutReloadTimer();
     stopRefreshLoop();
 
     if (!normalizedConference) {
@@ -1041,26 +1397,97 @@
     }
 
     const requestId = ++activeRequestId;
+    let resolvedStreamData = null;
+    const singleTile = isSingleTileLayout();
 
     try {
-      if (isSingleTileLayout()) {
-        try {
-          const singleTileStream =
-            await resolveStreamData(normalizedConference);
+      if (singleTile) {
+        const immediateParticipantPreview = resolvePrimaryTileParticipantShot();
+        if (immediateParticipantPreview) {
+          const immediateCandidates = buildPreviewSourceCandidates(
+            immediateParticipantPreview,
+          );
+          const hasImmediatePreview =
+            currentRenderMode === "preview" &&
+            immediateCandidates.includes(currentPreviewSrc);
+
+          if (!hasImmediatePreview) {
+            playPreview(immediateParticipantPreview, "Participant preview mode");
+          }
+        }
+
+        const previewCandidates = [];
+
+        function addPreviewCandidate(src) {
+          const resolved = String(src || "").trim();
+          if (!resolved) {
+            return;
+          }
+          if (previewCandidates.includes(resolved)) {
+            return;
+          }
+          previewCandidates.push(resolved);
+        }
+
+        addPreviewCandidate(immediateParticipantPreview);
+
+        const participantCandidates = resolvePrimaryTileParticipantCandidates();
+        if (participantCandidates.length) {
+          const participantPreview = await resolveParticipantPreviewFromApi(
+            normalizedConference,
+            participantCandidates,
+          );
           if (requestId !== activeRequestId) {
             return;
           }
+          addPreviewCandidate(participantPreview);
+        }
 
-          if (singleTileStream.hlsSrc || singleTileStream.previewSrc) {
-            await playVideoStream(
-              singleTileStream.hlsSrc,
-              singleTileStream.previewSrc,
-            );
+        const conferenceParticipantPreview =
+          await resolveConferencePreviewFromParticipants(normalizedConference);
+        if (requestId !== activeRequestId) {
+          return;
+        }
+        addPreviewCandidate(conferenceParticipantPreview);
+
+        try {
+          resolvedStreamData = await resolveStreamData(normalizedConference);
+        } catch (_streamResolveError) {
+          resolvedStreamData = null;
+        }
+
+        if (requestId !== activeRequestId) {
+          return;
+        }
+
+        if (resolvedStreamData) {
+          addPreviewCandidate(resolvedStreamData.previewSrc);
+        }
+
+        if (
+          previewCandidates.length &&
+          playPreview(previewCandidates, "Participant preview mode")
+        ) {
+          return;
+        }
+
+        if (resolvedStreamData && resolvedStreamData.hlsSrc) {
+          const played = await playVideoStream(
+            resolvedStreamData.hlsSrc,
+            previewCandidates[0] || resolvedStreamData.previewSrc || "",
+          );
+          if (requestId !== activeRequestId) {
             return;
           }
-        } catch (_singleTileError) {
-          // Fall through to preview/shot fallback chain.
+          if (played) {
+            return;
+          }
         }
+
+        if (currentRenderMode !== "preview" && currentRenderMode !== "hls") {
+          setStatus("No participant preview available for this conference.");
+        }
+        return;
       }
 
       if (renderTileShotsForGrid()) {
@@ -1080,7 +1507,8 @@
         return;
       }
 
-      const streamData = await resolveStreamData(normalizedConference);
+      const streamData =
+        resolvedStreamData || (await resolveStreamData(normalizedConference));
       if (requestId !== activeRequestId) {
         return;
       }
@@ -1256,9 +1684,26 @@
       "dashboard:conference-active-changed",
       function (event) {
         const detail = event && event.detail ? event.detail : {};
+        stopLayoutReloadTimer();
         void loadConferenceStream(detail.number || "");
       },
     );
+  }
+
+  function scheduleLayoutStreamReload(conferenceNumber) {
+    const normalizedConference = String(conferenceNumber || "").trim();
+    if (!normalizedConference) {
+      return;
+    }
+
+    if (layoutReloadTimer) {
+      window.clearTimeout(layoutReloadTimer);
+    }
+
+    layoutReloadTimer = window.setTimeout(function () {
+      layoutReloadTimer = null;
+      void loadConferenceStream(normalizedConference);
+    }, LAYOUT_STREAM_RELOAD_DEBOUNCE_MS);
   }
 
   function bindLayoutChangeListener() {
@@ -1269,7 +1714,42 @@
       if (!currentConference) {
         return;
       }
-      void loadConferenceStream(currentConference);
+      scheduleLayoutStreamReload(currentConference);
+    });
+  }
+
+  function syncMediaForTilePlacement() {
+    if (!currentConference) {
+      currentConference = getActiveConferenceNumber();
+    }
+    if (!currentConference) {
+      return;
+    }
+
+    if (isSingleTileLayout()) {
+      const participantShot = resolvePrimaryTileParticipantShot();
+      if (participantShot) {
+        playPreview(participantShot, "Participant preview mode");
+      } else if (currentRenderMode === "none") {
+        void loadConferenceStream(currentConference);
+      }
+      return;
+    }
+
+    renderTileShotsForGrid();
+  }
+
+  function scheduleTilePlacementMediaSync() {
+    stopLayoutTileSyncFrame();
+    layoutTileSyncFrameId = window.requestAnimationFrame(function () {
+      layoutTileSyncFrameId = 0;
+      syncMediaForTilePlacement();
+    });
+  }
+
+  function bindLayoutTileUpdateListener() {
+    document.addEventListener("dashboard:layout-tiles-updated", function () {
+      scheduleTilePlacementMediaSync();
     });
   }
 
@@ -1285,14 +1765,25 @@
         }
 
         if (isSingleTileLayout()) {
-          // Prevent 5s flicker: participant polling should not restart HLS/preview
-          // unless we are in preview mode and the target participant changed.
-          if (currentRenderMode === "preview") {
-            const participantShot = resolvePrimaryTileParticipantShot();
-            const normalizedShot = normalizeToProxyApiPath(participantShot);
-            if (normalizedShot && normalizedShot !== currentPreviewSrc) {
+          // Keep HLS stable, but refresh preview fallback when participant shot appears/changes.
+          if (currentRenderMode === "hls") {
+            return;
+          }
+
+          const participantShot = resolvePrimaryTileParticipantShot();
+          if (participantShot) {
+            const shotCandidates = buildPreviewSourceCandidates(participantShot);
+            if (
+              currentRenderMode !== "preview" ||
+              !shotCandidates.includes(currentPreviewSrc)
+            ) {
               playPreview(participantShot, "Participant preview mode");
             }
+            return;
+          }
+
+          if (currentRenderMode === "none") {
+            void loadConferenceStream(currentConference);
           }
           return;
         }
@@ -1330,6 +1821,7 @@
     bindParticipantClickFocus();
     bindConferenceChangeListener();
     bindLayoutChangeListener();
+    bindLayoutTileUpdateListener();
     bindParticipantListChangeListener();
     bindGridMutationObserver();
 

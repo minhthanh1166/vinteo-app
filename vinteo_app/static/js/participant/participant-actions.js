@@ -139,6 +139,8 @@
 
         let cachedKickConfirmPopup = null;
         let kickConfirmPopupInitialized = false;
+        let disconnectedActionMenu = null;
+        let disconnectedActionMenuRow = null;
 
         function getKickConfirmPopup() {
           if (kickConfirmPopupInitialized) {
@@ -317,6 +319,378 @@
           );
         }
 
+        const FAST_CALL_FALLBACK_OPTIONS = {
+          resolution: [
+            { value: "UHD", label: "UltraHD (4K) 3840x2160" },
+            { value: "FULLHD", label: "FullHD 1920x1080" },
+            { value: "720p", label: "HD 1280x720" },
+            { value: "4CIF", label: "4CIF 704x576" },
+            { value: "VGA", label: "VGA 640x480" },
+            { value: "CIF", label: "CIF 352x288" },
+          ],
+          speed: [
+            { value: "512", label: "512 Kb/s" },
+            { value: "768", label: "768 Kb/s" },
+            { value: "1024", label: "1 Mb/s" },
+            { value: "1536", label: "1.5 Mb/s" },
+            { value: "2048", label: "2 Mb/s" },
+            { value: "3072", label: "3 Mb/s" },
+            { value: "4096", label: "4 Mb/s" },
+          ],
+          fps: [
+            { value: "15", label: "15" },
+            { value: "25", label: "25" },
+            { value: "30", label: "30" },
+            { value: "60", label: "60" },
+          ],
+        };
+
+        function getFastCallDefaults(button) {
+          const source = button || {};
+          const speedValue = Number(
+            source.dataset && source.dataset.callSpeed
+              ? source.dataset.callSpeed
+              : 1536,
+          );
+          const fpsValue = Number(
+            source.dataset && source.dataset.callFps ? source.dataset.callFps : 25,
+          );
+
+          return {
+            type: String(
+              source.dataset && source.dataset.callType
+                ? source.dataset.callType
+                : "SIP",
+            )
+              .trim()
+              .toUpperCase(),
+            resolution: String(
+              source.dataset && source.dataset.callResolution
+                ? source.dataset.callResolution
+                : "720p",
+            ).trim(),
+            speed: Number.isFinite(speedValue) && speedValue > 0 ? speedValue : 1536,
+            fps: Number.isFinite(fpsValue) && fpsValue > 0 ? fpsValue : 25,
+          };
+        }
+
+        function buildFastCallOptionsFromSelect(selectElement, fallbackOptions) {
+          if (
+            selectElement &&
+            selectElement.options &&
+            selectElement.options.length > 0
+          ) {
+            return Array.from(selectElement.options)
+              .map(function (option) {
+                const value = String(option.value || "").trim();
+                if (!value) {
+                  return null;
+                }
+                return {
+                  value: value,
+                  label: String(option.textContent || value).trim(),
+                };
+              })
+              .filter(Boolean);
+          }
+
+          return (Array.isArray(fallbackOptions) ? fallbackOptions : []).map(
+            function (option) {
+              return {
+                value: String(option.value || "").trim(),
+                label: String(option.label || option.value || "").trim(),
+              };
+            },
+          );
+        }
+
+        function applyFastCallOptions(selectElement, options, preferredValue) {
+          if (!selectElement) {
+            return "";
+          }
+
+          const normalizedOptions = (Array.isArray(options) ? options : []).filter(
+            function (option) {
+              return (
+                option &&
+                typeof option.value === "string" &&
+                option.value.trim().length > 0
+              );
+            },
+          );
+          selectElement.innerHTML = "";
+
+          normalizedOptions.forEach(function (option) {
+            const optionNode = document.createElement("option");
+            optionNode.value = option.value;
+            optionNode.textContent = option.label || option.value;
+            selectElement.appendChild(optionNode);
+          });
+
+          const normalizedPreferred = String(preferredValue || "").trim();
+          const hasPreferred = normalizedOptions.some(function (option) {
+            return option.value === normalizedPreferred;
+          });
+          if (hasPreferred) {
+            selectElement.value = normalizedPreferred;
+            return normalizedPreferred;
+          }
+
+          const firstOption = normalizedOptions[0];
+          if (firstOption) {
+            selectElement.value = firstOption.value;
+            return firstOption.value;
+          }
+
+          return "";
+        }
+
+        function openFastCallModal(modalElement) {
+          if (!modalElement) {
+            return;
+          }
+          modalElement.removeAttribute("hidden");
+          modalElement.classList.add("is-open");
+        }
+
+        function closeFastCallModal(modalElement) {
+          if (!modalElement) {
+            return;
+          }
+          modalElement.classList.remove("is-open");
+          modalElement.setAttribute("hidden", "");
+        }
+
+        function dispatchParticipantListRefresh() {
+          document.dispatchEvent(
+            new CustomEvent("dashboard:conference-list-refreshed"),
+          );
+          window.setTimeout(function () {
+            document.dispatchEvent(
+              new CustomEvent("dashboard:conference-list-refreshed"),
+            );
+          }, 1200);
+        }
+
+        async function requestFastCall(conferenceNumber, numberValue, options) {
+          const apiClient = getVinteoApiClient();
+          if (!apiClient) {
+            throw new Error("API client is not ready.");
+          }
+
+          const normalizedConference = String(conferenceNumber || "").trim();
+          const normalizedNumber = String(numberValue || "").trim();
+          const optionObject =
+            options && typeof options === "object" ? options : {};
+          const typeValue = String(optionObject.type || "SIP")
+            .trim()
+            .toUpperCase();
+          const resolutionValue = String(optionObject.resolution || "720p").trim();
+          const speedValue = Number(optionObject.speed);
+          const fpsValue = Number(optionObject.fps);
+
+          if (!normalizedConference) {
+            throw new Error("Conference is not selected.");
+          }
+          if (!normalizedNumber) {
+            throw new Error("Participant IP/URI is required.");
+          }
+
+          const payload = {
+            conference: normalizedConference,
+            number: normalizedNumber,
+            type: typeValue || "SIP",
+            resolution: resolutionValue || "720p",
+            speed: Number.isFinite(speedValue) && speedValue > 0 ? speedValue : 1536,
+            fps: Number.isFinite(fpsValue) && fpsValue > 0 ? fpsValue : 25,
+          };
+
+          const response = await apiClient.post("/api/v1/fast_call", payload);
+          return response && response.data ? response.data : null;
+        }
+
+        function initFastCallButton() {
+          const callButton = document.getElementById("participant-fast-call-btn");
+          const modal = document.getElementById("participant-fast-call-modal");
+          const form = document.getElementById("participant-fast-call-form");
+          if (!callButton || !modal || !form) {
+            return;
+          }
+          if (callButton.dataset.bound === "1") {
+            return;
+          }
+
+          const conferenceSettingForm = document.getElementById(
+            "conference-setting-form",
+          );
+          const typeSelect = form.elements.type;
+          const numberInput = form.elements.number;
+          const resolutionSelect = form.elements.resolution;
+          const speedSelect = form.elements.speed;
+          const fpsSelect = form.elements.fps;
+          const submitButton = form.querySelector(".participant-fast-call-submit");
+          const closeTargets = modal.querySelectorAll("[data-fast-call-close]");
+          const defaultTitle = callButton.title;
+
+          if (
+            !typeSelect ||
+            !numberInput ||
+            !resolutionSelect ||
+            !speedSelect ||
+            !fpsSelect ||
+            !submitButton
+          ) {
+            return;
+          }
+
+          function syncFastCallSelectOptions(defaults) {
+            const resolutionSource = conferenceSettingForm
+              ? conferenceSettingForm.elements.anonymousResolution
+              : null;
+            const speedSource = conferenceSettingForm
+              ? conferenceSettingForm.elements.anonymousBandwidth
+              : null;
+            const fpsSource = conferenceSettingForm
+              ? conferenceSettingForm.elements.anonymousFPS
+              : null;
+            const resolutionOptions = buildFastCallOptionsFromSelect(
+              resolutionSource,
+              FAST_CALL_FALLBACK_OPTIONS.resolution,
+            );
+            const speedOptions = buildFastCallOptionsFromSelect(
+              speedSource,
+              FAST_CALL_FALLBACK_OPTIONS.speed,
+            );
+            const fpsOptions = buildFastCallOptionsFromSelect(
+              fpsSource,
+              FAST_CALL_FALLBACK_OPTIONS.fps,
+            );
+
+            applyFastCallOptions(
+              resolutionSelect,
+              resolutionOptions,
+              resolutionSource
+                ? resolutionSource.value
+                : String(defaults.resolution || "720p"),
+            );
+            applyFastCallOptions(
+              speedSelect,
+              speedOptions,
+              speedSource ? speedSource.value : String(defaults.speed || "1536"),
+            );
+            applyFastCallOptions(
+              fpsSelect,
+              fpsOptions,
+              fpsSource ? fpsSource.value : String(defaults.fps || "25"),
+            );
+          }
+
+          function openModalForConference(conferenceNumber) {
+            const defaults = getFastCallDefaults(callButton);
+            form.dataset.conference = String(conferenceNumber || "").trim();
+            typeSelect.value = defaults.type || "SIP";
+            syncFastCallSelectOptions(defaults);
+            numberInput.value = "";
+            openFastCallModal(modal);
+            window.setTimeout(function () {
+              numberInput.focus();
+            }, 0);
+          }
+
+          function isModalOpen() {
+            return modal.classList.contains("is-open");
+          }
+
+          function closeModalIfIdle() {
+            if (form.dataset.busy === "1") {
+              return;
+            }
+            closeFastCallModal(modal);
+          }
+
+          callButton.dataset.bound = "1";
+          callButton.addEventListener("click", function () {
+            if (callButton.dataset.busy === "1") {
+              return;
+            }
+
+            const conferenceNumber = getActiveConferenceNumber();
+            if (!conferenceNumber) {
+              window.alert("Please select a conference first.");
+              return;
+            }
+            openModalForConference(conferenceNumber);
+          });
+
+          closeTargets.forEach(function (target) {
+            target.addEventListener("click", function () {
+              closeModalIfIdle();
+            });
+          });
+
+          document.addEventListener("keydown", function (event) {
+            if (!isModalOpen() || event.key !== "Escape") {
+              return;
+            }
+            closeModalIfIdle();
+          });
+
+          form.addEventListener("submit", async function (event) {
+            event.preventDefault();
+            if (form.dataset.busy === "1") {
+              return;
+            }
+
+            const conferenceNumber = String(
+              form.dataset.conference || getActiveConferenceNumber(),
+            ).trim();
+            const numberValue = String(numberInput.value || "").trim();
+            const typeValue = String(typeSelect.value || "SIP")
+              .trim()
+              .toUpperCase();
+            const resolutionValue = String(resolutionSelect.value || "720p").trim();
+            const speedValue = Number(speedSelect.value);
+            const fpsValue = Number(fpsSelect.value);
+
+            if (!conferenceNumber) {
+              window.alert("Please select a conference first.");
+              return;
+            }
+            if (!numberValue) {
+              window.alert("Participant IP/URI cannot be empty.");
+              numberInput.focus();
+              return;
+            }
+
+            form.dataset.busy = "1";
+            submitButton.disabled = true;
+            callButton.dataset.busy = "1";
+            callButton.disabled = true;
+            callButton.title = "Calling...";
+
+            try {
+              await requestFastCall(conferenceNumber, numberValue, {
+                type: typeValue,
+                resolution: resolutionValue,
+                speed: speedValue,
+                fps: fpsValue,
+              });
+              closeFastCallModal(modal);
+              dispatchParticipantListRefresh();
+            } catch (error) {
+              window.alert(
+                "Cannot call participant: " + extractRequestErrorMessage(error),
+              );
+            } finally {
+              form.dataset.busy = "0";
+              submitButton.disabled = false;
+              callButton.dataset.busy = "0";
+              callButton.disabled = false;
+              callButton.title = defaultTitle;
+            }
+          });
+        }
+
         async function requestDeleteParticipant(
           conferenceNumber,
           participantNumber,
@@ -336,9 +710,110 @@
             throw new Error("Participant is not selected.");
           }
 
-          await apiClient.post("/api/v1/disconnect", {
+          const conferencePath = encodeURIComponent(normalizedConference);
+          const participantPath = encodeURIComponent(normalizedParticipant);
+
+          try {
+            await apiClient.delete(
+              "/api/v1/participant/" +
+                conferencePath +
+                "/" +
+                participantPath,
+            );
+            return;
+          } catch (deleteError) {
+            try {
+              await apiClient.post("/api/v1/disconnect", {
+                conference: normalizedConference,
+                participants: [normalizedParticipant],
+              });
+            } catch (_disconnectError) {
+              throw deleteError;
+            }
+          }
+        }
+
+        async function requestCallParticipant(
+          conferenceNumber,
+          participantNumber,
+        ) {
+          const apiClient = getVinteoApiClient();
+          if (!apiClient) {
+            throw new Error("API client is not ready.");
+          }
+
+          const normalizedConference = String(conferenceNumber || "").trim();
+          const normalizedParticipant = String(participantNumber || "").trim();
+
+          if (!normalizedConference) {
+            throw new Error("Conference is not selected.");
+          }
+          if (!normalizedParticipant) {
+            throw new Error("Participant is not selected.");
+          }
+
+          await apiClient.post("/api/v1/call", {
             conference: normalizedConference,
             participants: [normalizedParticipant],
+          });
+        }
+
+        function extractDialTargetFromIdentifier(participantIdentifier) {
+          const rawIdentifier = String(participantIdentifier || "").trim();
+          if (!rawIdentifier) {
+            return { type: "SIP", number: "" };
+          }
+
+          let typeValue = "SIP";
+          let numberValue = rawIdentifier;
+
+          const prefixed = rawIdentifier.match(/^([a-z0-9_.-]+)[/:|](.+)$/i);
+          if (prefixed && prefixed[2]) {
+            const normalizedType = String(prefixed[1] || "")
+              .trim()
+              .toUpperCase();
+            if (normalizedType.includes("323")) {
+              typeValue = "H323";
+            } else if (normalizedType.includes("SIP")) {
+              typeValue = "SIP";
+            }
+            numberValue = String(prefixed[2] || "").trim();
+          }
+
+          const ipMatch = numberValue.match(/\b(?:\d{1,3}\.){3}\d{1,3}\b/);
+          if (ipMatch && ipMatch[0]) {
+            return {
+              type: typeValue,
+              number: ipMatch[0],
+            };
+          }
+
+          const cleanedNumber = numberValue
+            .replace(/^sip:/i, "")
+            .replace(/^h\.?323:/i, "")
+            .replace(/-\d+$/, "")
+            .trim();
+
+          return {
+            type: typeValue,
+            number: cleanedNumber,
+          };
+        }
+
+        async function requestCallParticipantFallback(
+          conferenceNumber,
+          participantIdentifier,
+        ) {
+          const dialTarget = extractDialTargetFromIdentifier(participantIdentifier);
+          if (!dialTarget.number) {
+            throw new Error("Participant number is invalid.");
+          }
+
+          await requestFastCall(conferenceNumber, dialTarget.number, {
+            type: dialTarget.type || "SIP",
+            resolution: "720p",
+            speed: 1536,
+            fps: 25,
           });
         }
 
@@ -461,7 +936,8 @@
             return true;
           } catch (error) {
             window.alert(
-              "Cannot remove participant: " + extractRequestErrorMessage(error),
+              "Cannot disconnect participant: " +
+                extractRequestErrorMessage(error),
             );
             return false;
           } finally {
@@ -483,9 +959,9 @@
           const memberName =
             getParticipantDisplayNameFromRow(currentRow) || "participant";
           const message =
-            "Are you sure you want to kick " +
+            "Are you sure you want to disconnect " +
             memberName +
-            " out of this meeting?";
+            " from this meeting?";
 
           const kickPopup = getKickConfirmPopup();
           const usedModal =
@@ -503,6 +979,93 @@
           const accepted = window.confirm(message);
           if (accepted) {
             void executeKickParticipantRow(currentRow);
+          }
+        }
+
+        function triggerDeleteWithConfirmation(row) {
+          if (!row || row.classList.contains("participant-empty-row")) {
+            return;
+          }
+
+          const participantNumber = getParticipantNumberFromRow(row);
+          const currentRow =
+            findRenderedParticipantRowByNumber(participantNumber) || row;
+          const memberName =
+            getParticipantDisplayNameFromRow(currentRow) || "participant";
+          const accepted = window.confirm(
+            "Are you sure you want to delete " +
+              memberName +
+              " from this meeting?",
+          );
+          if (accepted) {
+            void executeKickParticipantRow(currentRow);
+          }
+        }
+
+        async function callDisconnectedParticipantRow(row) {
+          if (!row || row.classList.contains("participant-empty-row")) {
+            return false;
+          }
+
+          const participantNumber = getParticipantNumberFromRow(row);
+          const currentRow =
+            findRenderedParticipantRowByNumber(participantNumber) || row;
+          if (!currentRow) {
+            return false;
+          }
+          if (currentRow.dataset.callBusy === "1") {
+            return false;
+          }
+
+          const conferenceNumber = getActiveConferenceNumber();
+          const participantIdentifiers = collectParticipantIdentifiers(currentRow);
+          if (!conferenceNumber) {
+            window.alert("Conference is not selected.");
+            return false;
+          }
+          if (!participantIdentifiers.length) {
+            window.alert("Participant is not selected.");
+            return false;
+          }
+
+          currentRow.dataset.callBusy = "1";
+
+          try {
+            let callError = null;
+            let called = false;
+
+            for (
+              let index = 0;
+              index < participantIdentifiers.length;
+              index += 1
+            ) {
+              const candidate = participantIdentifiers[index];
+              try {
+                await requestCallParticipant(conferenceNumber, candidate);
+                called = true;
+                break;
+              } catch (error) {
+                callError = error;
+              }
+            }
+
+            if (!called) {
+              await requestCallParticipantFallback(
+                conferenceNumber,
+                participantIdentifiers[0],
+              );
+            }
+
+            dispatchParticipantListRefresh();
+            return true;
+          } catch (error) {
+            window.alert(
+              "Cannot call participant: " +
+                extractRequestErrorMessage(error),
+            );
+            return false;
+          } finally {
+            currentRow.dataset.callBusy = "0";
           }
         }
 
@@ -847,19 +1410,134 @@
           });
         }
 
-        function createKickButton(memberName) {
+        function createKickButton(memberName, row) {
+          const isDisconnected = isParticipantRowDisconnected(row);
           const button = document.createElement("button");
           button.type = "button";
-          button.className = "kick-btn";
+          button.className = "kick-btn" + (isDisconnected ? " is-overflow" : "");
           button.dataset.memberName = memberName;
-          button.title = "Kick " + memberName;
-          button.setAttribute("aria-label", "Kick " + memberName);
+          button.dataset.actionMode = isDisconnected ? "menu" : "disconnect";
+
+          if (isDisconnected) {
+            button.title = "Actions for " + memberName;
+            button.setAttribute("aria-label", "Actions for " + memberName);
+            button.innerHTML =
+              '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+              '<path d="M12 5a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm0 5a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm0 5a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>' +
+              "</svg>";
+            return button;
+          }
+
+          button.title = "Disconnect " + memberName;
+          button.setAttribute("aria-label", "Disconnect " + memberName);
           button.innerHTML =
             '<svg viewBox="0 0 24 24" aria-hidden="true">' +
             '<path d="M10 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm0 10c-3.87 0-7 2.01-7 4.5V20h10.48a5.43 5.43 0 0 1-.48-2.25c0-1.42.55-2.7 1.45-3.66A13.8 13.8 0 0 0 10 14z"/>' +
             '<path d="M15.71 14.29a1 1 0 0 0-1.42 1.42L15.59 17l-1.3 1.29a1 1 0 1 0 1.42 1.42L17 18.41l1.29 1.3a1 1 0 0 0 1.42-1.42L18.41 17l1.3-1.29a1 1 0 0 0-1.42-1.42L17 15.59l-1.29-1.3z"/>' +
             "</svg>";
           return button;
+        }
+
+        function closeDisconnectedActionMenu() {
+          if (!disconnectedActionMenu) {
+            return;
+          }
+          disconnectedActionMenu.hidden = true;
+          disconnectedActionMenuRow = null;
+        }
+
+        function ensureDisconnectedActionMenu() {
+          if (disconnectedActionMenu) {
+            return disconnectedActionMenu;
+          }
+
+          const menu = document.createElement("div");
+          menu.className = "participant-context-menu participant-row-action-menu";
+          menu.hidden = true;
+          menu.innerHTML =
+            '<button type="button" class="participant-context-menu__item" data-menu-action="call">Call</button>' +
+            '<button type="button" class="participant-context-menu__item is-danger" data-menu-action="delete">Delete</button>';
+          document.body.appendChild(menu);
+
+          menu.addEventListener("click", function (event) {
+            const menuItem = event.target.closest("[data-menu-action]");
+            if (!menuItem) {
+              return;
+            }
+            const menuAction = String(menuItem.dataset.menuAction || "").trim();
+            const targetRow = disconnectedActionMenuRow;
+            closeDisconnectedActionMenu();
+
+            if (!targetRow) {
+              return;
+            }
+
+            if (menuAction === "call") {
+              void callDisconnectedParticipantRow(targetRow);
+              return;
+            }
+
+            if (menuAction === "delete") {
+              triggerDeleteWithConfirmation(targetRow);
+            }
+          });
+
+          document.addEventListener("click", function (event) {
+            if (!menu.hidden && !menu.contains(event.target)) {
+              closeDisconnectedActionMenu();
+            }
+          });
+
+          document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape") {
+              closeDisconnectedActionMenu();
+            }
+          });
+
+          window.addEventListener("resize", closeDisconnectedActionMenu);
+          window.addEventListener(
+            "scroll",
+            function () {
+              if (!menu.hidden) {
+                closeDisconnectedActionMenu();
+              }
+            },
+            true,
+          );
+
+          disconnectedActionMenu = menu;
+          return disconnectedActionMenu;
+        }
+
+        function openDisconnectedActionMenu(triggerButton, row) {
+          const menu = ensureDisconnectedActionMenu();
+          if (!menu || !triggerButton || !row) {
+            return;
+          }
+
+          const participantNumber = getParticipantNumberFromRow(row);
+          disconnectedActionMenuRow =
+            findRenderedParticipantRowByNumber(participantNumber) || row;
+
+          menu.hidden = false;
+          menu.style.left = "0px";
+          menu.style.top = "0px";
+
+          const triggerRect = triggerButton.getBoundingClientRect();
+          const menuWidth = menu.offsetWidth || 120;
+          const menuHeight = menu.offsetHeight || 74;
+
+          const maxLeft = Math.max(window.innerWidth - menuWidth - 8, 8);
+          const maxTop = Math.max(window.innerHeight - menuHeight - 8, 8);
+
+          const menuLeft = Math.max(
+            8,
+            Math.min(triggerRect.right - menuWidth, maxLeft),
+          );
+          const menuTop = Math.max(8, Math.min(triggerRect.bottom + 4, maxTop));
+
+          menu.style.left = menuLeft + "px";
+          menu.style.top = menuTop + "px";
         }
 
         function initKickMemberButtons() {
@@ -874,7 +1552,11 @@
 
           Array.from(tableBody.querySelectorAll("tr")).forEach(function (row) {
             if (row.classList.contains("participant-empty-row")) return;
-            if (row.querySelector("td.kick-col")) return;
+
+            const existingActionCell = row.querySelector("td.kick-col");
+            if (existingActionCell) {
+              existingActionCell.remove();
+            }
 
             const nameCell = row.children[1];
             const memberName = nameCell
@@ -886,7 +1568,7 @@
 
             const actionWrap = document.createElement("div");
             actionWrap.className = "kick-cell";
-            actionWrap.appendChild(createKickButton(memberName));
+            actionWrap.appendChild(createKickButton(memberName, row));
 
             actionCell.appendChild(actionWrap);
             row.appendChild(actionCell);
@@ -901,7 +1583,18 @@
 
             const targetRow = kickButton.closest("tr");
             if (!targetRow) return;
+            const actionMode = String(kickButton.dataset.actionMode || "disconnect")
+              .trim()
+              .toLowerCase();
 
+            if (actionMode === "menu") {
+              event.preventDefault();
+              event.stopPropagation();
+              openDisconnectedActionMenu(kickButton, targetRow);
+              return;
+            }
+
+            closeDisconnectedActionMenu();
             triggerKickWithConfirmation(targetRow);
           });
         }
@@ -909,6 +1602,7 @@
         document.addEventListener(
           "dashboard:participant-list-updated",
           function () {
+            closeDisconnectedActionMenu();
             initKickMemberButtons();
             syncMuteAllButtonState();
           },
@@ -931,5 +1625,6 @@
     initMicToggle: initMicToggle,
     initParticipantMediaToggles: initParticipantMediaToggles,
     initKickMemberButtons: initKickMemberButtons,
+    initFastCallButton: initFastCallButton,
   };
 })();
