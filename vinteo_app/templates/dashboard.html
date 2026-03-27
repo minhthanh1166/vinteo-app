@@ -1,802 +1,469 @@
-<!DOCTYPE html>
+﻿<!doctype html>
+{% load static %}
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vinteo RMX Manager</title>
-    <style>
-        :root {
-            --page-bg: #d6dde6;
-            --frame-bg: #eef2f6;
-            --line: #9aa8b7;
-            --line-soft: #c3ced8;
-            --nav-bg: #d7e0ea;
-            --panel-bg: #f7f9fb;
-            --panel-inner: #ffffff;
-            --text: #213240;
-            --muted: #5f7283;
-            --green: #488d38;
-            --amber: #c68f10;
-            --red: #ad4040;
-            --shadow: 0 10px 24px rgba(40, 60, 80, 0.14);
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            background: linear-gradient(180deg, #cad4df 0%, var(--page-bg) 100%);
-            font-family: Tahoma, Arial, sans-serif;
-            color: var(--text);
-            font-size: 12px;
-        }
-
-        .shell {
-            width: min(1500px, calc(100vw - 24px));
-            margin: 12px auto;
-            background: var(--frame-bg);
-            border: 1px solid #7f8f9f;
-            box-shadow: var(--shadow);
-        }
-
-        .top-header {
-            background: linear-gradient(180deg, #5c8ab3 0%, #2a6596 42%, #1a537f 100%);
-            color: #fff;
-            border-bottom: 1px solid #6b7f92;
-        }
-
-        .top-header-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 20px;
-            padding: 12px 16px 10px;
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .brand-logo {
-            width: 40px;
-            height: 40px;
-            border-radius: 6px;
-            border: 1px solid rgba(255, 255, 255, 0.35);
-            background: linear-gradient(180deg, #79a9d3, #1b5d92);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            font-weight: 700;
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
-        }
-
-        .brand-title {
-            font-size: 22px;
-            font-weight: 700;
-            letter-spacing: 0.02em;
-        }
-
-        .brand-subtitle {
-            margin-top: 2px;
-            font-size: 11px;
-            color: #dfeeff;
-        }
-
-        .header-meta {
-            text-align: right;
-            line-height: 1.55;
-            font-size: 11px;
-            color: #e5f0fb;
-        }
-
-        .toolbar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-            padding: 7px 10px;
-            background: linear-gradient(180deg, #eff4f8, #d5e0ea);
-            border-top: 1px solid rgba(255, 255, 255, 0.24);
-            border-bottom: 1px solid var(--line);
-        }
-
-        .toolbar-left,
-        .toolbar-right,
-        .toolbar-icons {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            flex-wrap: wrap;
-        }
-
-        .tool,
-        .action-button,
-        .small-button {
-            border: 1px solid #8ea0b0;
-            background: linear-gradient(180deg, #ffffff, #d7e1ea);
-            color: #1d3245;
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
-        }
-
-        .tool {
-            min-width: 28px;
-            height: 26px;
-            border-radius: 3px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
-            font-weight: 700;
-        }
-
-        .small-button,
-        .action-button {
-            padding: 5px 10px;
-            border-radius: 3px;
-            cursor: default;
-            font-size: 12px;
-        }
-
-        .workspace {
-            display: grid;
-            grid-template-columns: 255px 1fr;
-            min-height: 820px;
-        }
-
-        .sidebar {
-            background: linear-gradient(180deg, #dee6ee, var(--nav-bg));
-            border-right: 1px solid var(--line);
-            padding: 10px;
-        }
-
-        .nav-panel,
-        .content-panel,
-        .summary-box,
-        .status-panel {
-            border: 1px solid var(--line);
-            background: var(--panel-bg);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
-        }
-
-        .nav-panel + .nav-panel {
-            margin-top: 10px;
-        }
-
-        .panel-caption {
-            padding: 6px 8px;
-            background: linear-gradient(180deg, #dde8f2, #c2d2e1);
-            border-bottom: 1px solid var(--line);
-            font-weight: 700;
-            color: #23435c;
-        }
-
-        .tree {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-
-        .tree li {
-            border-bottom: 1px solid #d5dde5;
-        }
-
-        .tree a {
-            display: block;
-            padding: 7px 8px 7px 24px;
-            color: #28455f;
-            text-decoration: none;
-            position: relative;
-            background: transparent;
-        }
-
-        .tree a::before {
-            content: "+";
-            position: absolute;
-            left: 8px;
-            top: 7px;
-            width: 11px;
-            height: 11px;
-            border: 1px solid #8da0b0;
-            background: #fff;
-            color: #456176;
-            line-height: 9px;
-            text-align: center;
-            font-size: 11px;
-        }
-
-        .tree a.active {
-            background: linear-gradient(180deg, #f9fcff, #dbe6f1);
-            font-weight: 700;
-        }
-
-        .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            padding: 8px;
-        }
-
-        .summary-box {
-            padding: 8px;
-            background: var(--panel-inner);
-        }
-
-        .summary-label {
-            color: var(--muted);
-            font-size: 11px;
-        }
-
-        .summary-value {
-            margin-top: 4px;
-            font-size: 18px;
-            font-weight: 700;
-            color: #173957;
-        }
-
-        .content {
-            padding: 10px;
-            background: #e8edf3;
-        }
-
-        .screen-title {
-            padding: 8px 10px;
-            border: 1px solid var(--line);
-            background: linear-gradient(180deg, #fdfefe, #dce7f0);
-            font-size: 18px;
-            font-weight: 700;
-            color: #264760;
-        }
-
-        .sub-status {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            margin-top: 8px;
-        }
-
-        .status-panel {
-            padding: 8px 10px;
-            background: linear-gradient(180deg, #ffffff, #ecf2f7);
-        }
-
-        .status-label {
-            color: var(--muted);
-            font-size: 11px;
-        }
-
-        .status-value {
-            margin-top: 4px;
-            font-size: 19px;
-            font-weight: 700;
-            color: #1c3d5a;
-        }
-
-        .tabs {
-            display: flex;
-            gap: 2px;
-            margin-top: 10px;
-        }
-
-        .tab {
-            padding: 7px 12px;
-            border: 1px solid var(--line);
-            border-bottom: none;
-            background: linear-gradient(180deg, #dae4ee, #c5d3df);
-            color: #35516a;
-            font-weight: 700;
-        }
-
-        .tab.active {
-            background: var(--panel-bg);
-            position: relative;
-            top: 1px;
-        }
-
-        .content-panel {
-            padding: 0;
-            background: var(--panel-bg);
-        }
-
-        .panel-body {
-            padding: 10px;
-        }
-
-        .split {
-            display: grid;
-            grid-template-columns: 1.5fr 0.9fr;
-            gap: 10px;
-        }
-
-        .section-title {
-            margin: 0 0 8px;
-            font-size: 13px;
-            color: #27445b;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: var(--panel-inner);
-            border: 1px solid var(--line-soft);
-        }
-
-        th {
-            background: linear-gradient(180deg, #e6eef6, #cedae5);
-            color: #324e66;
-            text-align: left;
-            padding: 7px 8px;
-            border: 1px solid #bcc9d4;
-            font-size: 11px;
-        }
-
-        td {
-            padding: 7px 8px;
-            border: 1px solid #d2dbe3;
-            color: #23394c;
-            background: #fff;
-        }
-
-        tbody tr:nth-child(even) td {
-            background: #f6f9fc;
-        }
-
-        .state {
-            font-weight: 700;
-        }
-
-        .state.ok {
-            color: var(--green);
-        }
-
-        .state.warn {
-            color: var(--amber);
-        }
-
-        .state.crit {
-            color: var(--red);
-        }
-
-        .info-grid {
-            display: grid;
-            gap: 10px;
-        }
-
-        .box {
-            border: 1px solid var(--line-soft);
-            background: var(--panel-inner);
-        }
-
-        .box-head {
-            padding: 6px 8px;
-            background: linear-gradient(180deg, #eef4f9, #d9e4ee);
-            border-bottom: 1px solid #c6d1dc;
-            font-weight: 700;
-            color: #32516c;
-        }
-
-        .box-body {
-            padding: 8px;
-        }
-
-        .meter-row {
-            margin-bottom: 10px;
-        }
-
-        .meter-row:last-child {
-            margin-bottom: 0;
-        }
-
-        .meter-meta {
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-            margin-bottom: 4px;
-        }
-
-        .meter {
-            height: 16px;
-            border: 1px solid #93a6b6;
-            background: linear-gradient(180deg, #fefefe, #dde7ef);
-            padding: 1px;
-        }
-
-        .meter-fill {
-            height: 100%;
-            background: linear-gradient(180deg, #78b04f, #4f8930);
-        }
-
-        .meter-fill.yellow {
-            background: linear-gradient(180deg, #efcb5a, #c79717);
-        }
-
-        .meter-fill.blue {
-            background: linear-gradient(180deg, #6eaed6, #2f78ad);
-        }
-
-        .event-list {
-            margin: 0;
-            padding-left: 18px;
-            line-height: 1.7;
-            color: #30495c;
-        }
-
-        .footer-status {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            padding: 6px 10px;
-            border-top: 1px solid var(--line);
-            background: linear-gradient(180deg, #edf3f8, #d4dee8);
-            color: #496074;
-            font-size: 11px;
-        }
-
-        .footer-left,
-        .footer-right {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            flex-wrap: wrap;
-        }
-
-        @media (max-width: 1100px) {
-            .workspace,
-            .split,
-            .sub-status {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
-</head>
-<body>
+    <link
+      rel="stylesheet"
+      href="{% static 'css/dashboard.css' %}?v=20260323-21"
+    />
+    <link
+      rel="stylesheet"
+      href="{% static 'css/conference.css' %}?v=20260318-1"
+    />
+    <link
+      rel="stylesheet"
+      href="{% static 'css/participant.css' %}?v=20260323-11"
+    />
+  </head>
+  <body>
     <div class="shell">
-        <header class="top-header">
-            <div class="top-header-row">
-                <div class="brand">
-                    <div class="brand-logo">V</div>
-                    <div>
-                        <div class="brand-title">Vinteo RMX Manager</div>
-                        <div class="brand-subtitle">Multipoint Control Dashboard · Administrative Console</div>
-                    </div>
-                </div>
-                <div class="header-meta">
-                    <div>Operator: admin</div>
-                    <div>System Time: 10-Mar-2026 09:42</div>
-                    <div>Domain: Vinteo Core Cluster</div>
-                </div>
+      <header class="top-header">
+        <div class="top-header-row">
+          <div class="brand">
+            <div class="brand-logo">V</div>
+            <div>
+              <div class="brand-title">Vinteo RMX Manager</div>
+              <div class="brand-subtitle">
+                Multipoint Control Dashboard - Administrative Console
+              </div>
             </div>
-            <div class="toolbar">
-                <div class="toolbar-left">
-                    <div class="toolbar-icons">
-                        <span class="tool">⌂</span>
-                        <span class="tool">⟳</span>
-                        <span class="tool">✉</span>
-                        <span class="tool">⚙</span>
-                        <span class="tool">?</span>
-                    </div>
-                    <span class="small-button">System Monitoring</span>
-                    <span class="small-button">Conference Control</span>
-                </div>
-                <div class="toolbar-right">
-                    <span class="action-button">New Conference</span>
-                    <span class="action-button">Operator Assistance</span>
-                </div>
+          </div>
+          <div class="header-meta">
+            <div>Operator: admin</div>
+            <div>
+              System Time: <span id="system-time-value">10-Mar-2026 09:42</span>
             </div>
-        </header>
-
-        <div class="workspace">
-            <aside class="sidebar">
-                <section class="nav-panel">
-                    <div class="panel-caption">Navigation</div>
-                    <ul class="tree">
-                        <li><a class="active" href="#">RMX Status</a></li>
-                        <li><a href="#">Conferences</a></li>
-                        <li><a href="#">Meeting Rooms</a></li>
-                        <li><a href="#">Entry Queues</a></li>
-                        <li><a href="#">Profiles</a></li>
-                        <li><a href="#">Participants</a></li>
-                        <li><a href="#">IP Services</a></li>
-                        <li><a href="#">Users</a></li>
-                        <li><a href="#">Event Log</a></li>
-                        <li><a href="#">Management Network</a></li>
-                    </ul>
-                </section>
-
-                <section class="nav-panel">
-                    <div class="panel-caption">System Summary</div>
-                    <div class="summary-grid">
-                        <div class="summary-box">
-                            <div class="summary-label">Active Conferences</div>
-                            <div class="summary-value">28</div>
-                        </div>
-                        <div class="summary-box">
-                            <div class="summary-label">Participants</div>
-                            <div class="summary-value">412</div>
-                        </div>
-                        <div class="summary-box">
-                            <div class="summary-label">Occupied Ports</div>
-                            <div class="summary-value">384</div>
-                        </div>
-                        <div class="summary-box">
-                            <div class="summary-label">Alarms</div>
-                            <div class="summary-value">03</div>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="nav-panel">
-                    <div class="panel-caption">Quick Health</div>
-                    <div class="panel-body">
-                        <div class="meter-row">
-                            <div class="meter-meta">
-                                <span>CPU Load</span>
-                                <strong>62%</strong>
-                            </div>
-                            <div class="meter"><div class="meter-fill blue" style="width: 62%;"></div></div>
-                        </div>
-                        <div class="meter-row">
-                            <div class="meter-meta">
-                                <span>Memory Usage</span>
-                                <strong>78%</strong>
-                            </div>
-                            <div class="meter"><div class="meter-fill yellow" style="width: 78%;"></div></div>
-                        </div>
-                        <div class="meter-row">
-                            <div class="meter-meta">
-                                <span>Port Capacity</span>
-                                <strong>48%</strong>
-                            </div>
-                            <div class="meter"><div class="meter-fill" style="width: 48%;"></div></div>
-                        </div>
-                    </div>
-                </section>
-            </aside>
-
-            <main class="content">
-                <div class="screen-title">RMX Status Monitor - Vinteo Main Bridge</div>
-
-                <div class="sub-status">
-                    <div class="status-panel">
-                        <div class="status-label">System Status</div>
-                        <div class="status-value">Normal</div>
-                    </div>
-                    <div class="status-panel">
-                        <div class="status-label">Licensed HD Ports</div>
-                        <div class="status-value">800</div>
-                    </div>
-                    <div class="status-panel">
-                        <div class="status-label">Used HD Ports</div>
-                        <div class="status-value">384</div>
-                    </div>
-                    <div class="status-panel">
-                        <div class="status-label">Reserved Conferences</div>
-                        <div class="status-value">11</div>
-                    </div>
-                </div>
-
-                <div class="tabs">
-                    <div class="tab active">Status</div>
-                    <div class="tab">Resources</div>
-                    <div class="tab">Conferences</div>
-                    <div class="tab">Alarms</div>
-                    <div class="tab">Properties</div>
-                </div>
-
-                <section class="content-panel">
-                    <div class="panel-body">
-                        <div class="split">
-                            <div>
-                                <h3 class="section-title">Active Conferences</h3>
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>Conference Name</th>
-                                            <th>Profile</th>
-                                            <th>Participants</th>
-                                            <th>Bit Rate</th>
-                                            <th>Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>Executive Weekly Review</td>
-                                            <td>1080p / AVC-SVC</td>
-                                            <td>42</td>
-                                            <td>2048 kbps</td>
-                                            <td class="state ok">Connected</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Townhall Overflow</td>
-                                            <td>Broadcast Layout</td>
-                                            <td>77</td>
-                                            <td>3072 kbps</td>
-                                            <td class="state ok">Connected</td>
-                                        </tr>
-                                        <tr>
-                                            <td>APAC Sales Coordination</td>
-                                            <td>720p / Auto Layout</td>
-                                            <td>18</td>
-                                            <td>1536 kbps</td>
-                                            <td class="state ok">Connected</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Support War Room</td>
-                                            <td>Secure Bridge</td>
-                                            <td>29</td>
-                                            <td>2048 kbps</td>
-                                            <td class="state warn">Standby</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Partner Onboarding</td>
-                                            <td>Lecture Mode</td>
-                                            <td>11</td>
-                                            <td>1024 kbps</td>
-                                            <td class="state warn">Scheduling</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-
-                                <h3 class="section-title" style="margin-top: 12px;">Card / Unit Status</h3>
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>Slot</th>
-                                            <th>Card Type</th>
-                                            <th>Utilization</th>
-                                            <th>Temperature</th>
-                                            <th>Health</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>01</td>
-                                            <td>Media Processing Card</td>
-                                            <td>54%</td>
-                                            <td>59°C</td>
-                                            <td class="state ok">OK</td>
-                                        </tr>
-                                        <tr>
-                                            <td>02</td>
-                                            <td>Media Processing Card</td>
-                                            <td>67%</td>
-                                            <td>63°C</td>
-                                            <td class="state ok">OK</td>
-                                        </tr>
-                                        <tr>
-                                            <td>03</td>
-                                            <td>Media Processing Card</td>
-                                            <td>84%</td>
-                                            <td>78°C</td>
-                                            <td class="state crit">Warning</td>
-                                        </tr>
-                                        <tr>
-                                            <td>04</td>
-                                            <td>RTM ISDN Gateway</td>
-                                            <td>48%</td>
-                                            <td>52°C</td>
-                                            <td class="state ok">OK</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <div class="info-grid">
-                                <section class="box">
-                                    <div class="box-head">Resource Allocation</div>
-                                    <div class="box-body">
-                                        <div class="meter-row">
-                                            <div class="meter-meta">
-                                                <span>Audio Ports</span>
-                                                <strong>188</strong>
-                                            </div>
-                                            <div class="meter"><div class="meter-fill" style="width: 47%;"></div></div>
-                                        </div>
-                                        <div class="meter-row">
-                                            <div class="meter-meta">
-                                                <span>Video Ports</span>
-                                                <strong>146</strong>
-                                            </div>
-                                            <div class="meter"><div class="meter-fill blue" style="width: 37%;"></div></div>
-                                        </div>
-                                        <div class="meter-row">
-                                            <div class="meter-meta">
-                                                <span>Content Channels</span>
-                                                <strong>50</strong>
-                                            </div>
-                                            <div class="meter"><div class="meter-fill yellow" style="width: 18%;"></div></div>
-                                        </div>
-                                    </div>
-                                </section>
-
-                                <section class="box">
-                                    <div class="box-head">Current Alarms</div>
-                                    <div class="box-body">
-                                        <table>
-                                            <thead>
-                                                <tr>
-                                                    <th>Severity</th>
-                                                    <th>Description</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td class="state crit">Critical</td>
-                                                    <td>Media card 03 temperature above threshold</td>
-                                                </tr>
-                                                <tr>
-                                                    <td class="state warn">Warning</td>
-                                                    <td>ISDN gateway nearing reserved capacity</td>
-                                                </tr>
-                                                <tr>
-                                                    <td class="state ok">Info</td>
-                                                    <td>Nightly configuration backup completed</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </section>
-
-                                <section class="box">
-                                    <div class="box-head">Recent Events</div>
-                                    <div class="box-body">
-                                        <ul class="event-list">
-                                            <li>Conference “Executive Weekly Review” connected 42 participants successfully.</li>
-                                            <li>Load balancing activated between media cards 02 and 03.</li>
-                                            <li>Configuration export stored in secure archive at 02:00 AM.</li>
-                                            <li>Gatekeeper registration refreshed without errors.</li>
-                                        </ul>
-                                    </div>
-                                </section>
-
-                                <section class="box">
-                                    <div class="box-head">System Identity</div>
-                                    <div class="box-body">
-                                        <table>
-                                            <tbody>
-                                                <tr>
-                                                    <td>Product</td>
-                                                    <td>Vinteo RMX Manager</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Bridge Name</td>
-                                                    <td>Vinteo Main Bridge</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Software Version</td>
-                                                    <td>8.7.1-demo</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Management IP</td>
-                                                    <td>10.10.40.25</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </section>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            </main>
+            <div>Domain: Vinteo Core Cluster</div>
+          </div>
         </div>
+      </header>
 
-        <footer class="footer-status">
-            <div class="footer-left">
-                <span>System State: Running</span>
-                <span>Licensed: 800 HD Ports</span>
-                <span>Vinteo Branding Enabled</span>
+      <div class="workspace">
+        {% include "conference/conference_sidebar.html" %}
+        <main class="content">
+          <section class="content-panel">
+            <div class="panel-body">
+              <div class="split">
+                <div class="split-main">
+                  <section class="zoom-stage">
+                    <div class="zoom-stage-body">
+                      <div class="zoom-grid single">
+                        <div class="zoom-tile main">
+                          <span class="zoom-label is-mini">Site 101</span>
+                        </div>
+                        <div
+                          class="zoom-controls"
+                          aria-label="Meeting controls"
+                        >
+                          <button
+                            type="button"
+                            class="zoom-control-btn leave"
+                            title="Leave conference"
+                          >
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                              <path
+                                d="M9.29 7.29a1 1 0 0 1 1.42 0l4 4a1 1 0 0 1 0 1.42l-4 4a1 1 0 1 1-1.42-1.42L11.59 13H4a1 1 0 1 1 0-2h7.59L9.29 8.71a1 1 0 0 1 0-1.42zM13 4h5a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-5a1 1 0 1 1 0-2h5V6h-5a1 1 0 1 1 0-2z"
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+                </div>
+
+                <div class="info-grid">
+                  <section class="box">
+                    <div class="box-head address-book-head">
+                      <span>Address Book</span>
+                      <div
+                        class="address-book-actions"
+                        aria-label="Address book actions"
+                      >
+                        <button
+                          type="button"
+                          class="address-icon-btn"
+                          data-address-action="add-participant"
+                          title="Add participant"
+                          aria-label="Add participant"
+                        >
+                          <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path
+                              d="M9 11a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm0 2c-3.33 0-6 1.79-6 4v2h9.5v-1.25A4.75 4.75 0 0 1 16.25 13zm10.75 2.75H18V14a1 1 0 0 0-2 0v1.75h-1.75a1 1 0 0 0 0 2H16v1.75a1 1 0 0 0 2 0v-1.75h1.75a1 1 0 0 0 0-2z"
+                            />
+                          </svg>
+                        </button>
+                        <button
+                          type="button"
+                          class="address-icon-btn is-danger"
+                          title="Delete participant"
+                          aria-label="Delete participant"
+                        >
+                          <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path
+                              d="M9 11a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm0 2c-3.33 0-6 1.79-6 4v2h11v-2c0-2.21-2.67-4-6-4zm6.5 2.5h5a1 1 0 1 1 0 2h-5a1 1 0 1 1 0-2z"
+                            />
+                          </svg>
+                        </button>
+                        <button
+                          type="button"
+                          class="address-icon-btn"
+                          data-address-action="add-group"
+                          title="Add group"
+                          aria-label="Add group"
+                        >
+                          <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path
+                              d="M6 7a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm12 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM6 9c-2.67 0-5 1.34-5 3v2h10v-2c0-1.66-2.33-3-5-3zm12 0c-2.67 0-5 1.34-5 3v2h4v2h2v-2h2v-2h-2V10h-2v2h-4c0-1.66 2.33-3 5-3 1.16 0 2.24.26 3.07.71A4.83 4.83 0 0 0 18 9z"
+                            />
+                          </svg>
+                        </button>
+                        <button
+                          type="button"
+                          class="address-icon-btn is-danger"
+                          title="Delete group"
+                          aria-label="Delete group"
+                        >
+                          <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path
+                              d="M6 7a3 3 0 1 0-3-3 3 3 0 0 0 3 3zm12 0a3 3 0 1 0-3-3 3 3 0 0 0 3 3zM6 9c-2.67 0-5 1.34-5 3v2h10v-2c0-1.66-2.33-3-5-3zm12 0c-2.67 0-5 1.34-5 3v2h10v-2c0-1.66-2.33-3-5-3zm-3.5 6.5h7a1 1 0 1 1 0 2h-7a1 1 0 1 1 0-2z"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                    <div
+                      class="box-body scroll-list sync-panel-body participant-list-body participant-list-top"
+                    >
+                      <div class="address-tree" role="tree"></div>
+                    </div>
+                  </section>
+                </div>
+
+                <div class="info-grid">
+                  <section class="box">
+                    <div class="box-head">Layout</div>
+                    <div
+                      class="box-body scroll-list sync-panel-body layout-panel-body"
+                    >
+                      <div class="layout-groups">
+                        <section class="layout-group" data-layout-type="equal">
+                          <h4 class="layout-group-title">Equal</h4>
+                          <div class="layout-thumb-grid">
+                            {% for image_path in layout_equal_images %}
+                            <img
+                              class="layout-thumb"
+                              data-layout-type="equal"
+                              src="{% static image_path %}"
+                              alt="Equal layout {{ forloop.counter }}"
+                            />
+                            {% empty %}
+                            <div class="layout-empty">
+                              No equal layouts found.
+                            </div>
+                            {% endfor %}
+                          </div>
+                        </section>
+
+                        <section class="layout-group" data-layout-type="focus">
+                          <h4 class="layout-group-title">Focus</h4>
+                          <div class="layout-thumb-grid">
+                            {% for image_path in layout_focus_images %}
+                            <img
+                              class="layout-thumb"
+                              data-layout-type="focus"
+                              src="{% static image_path %}"
+                              alt="Focus layout {{ forloop.counter }}"
+                            />
+                            {% empty %}
+                            <div class="layout-empty">
+                              No focus layouts found.
+                            </div>
+                            {% endfor %}
+                          </div>
+                        </section>
+                      </div>
+                    </div>
+                  </section>
+                </div>
+
+                {% include "participant/participant_list.html" %}
+              </div>
             </div>
-            <div class="footer-right">
-                <span>Alarm Summary: 1 Critical / 2 Warning</span>
-                <span>Refresh Interval: 30 sec</span>
-            </div>
-        </footer>
+          </section>
+        </main>
+      </div>
     </div>
-</body>
+    {% include "conference/conference_modals.html" %}
+    <div class="confirm-modal" id="kick-confirm-modal" hidden>
+      <div class="confirm-modal-backdrop" data-kick-modal-close></div>
+      <div
+        class="confirm-modal-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="kick-confirm-title"
+        aria-describedby="kick-confirm-message"
+      >
+        <h4 id="kick-confirm-title" class="confirm-modal-title">
+          Confirm Disconnect
+        </h4>
+        <p id="kick-confirm-message" class="confirm-modal-message">
+          Are you sure you want to disconnect this participant from this meeting?
+        </p>
+        <div class="confirm-modal-actions">
+          <button type="button" class="confirm-modal-btn" data-kick-cancel>
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="confirm-modal-btn danger"
+            data-kick-confirm
+          >
+            Disconnect
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="confirm-modal" id="leave-confirm-modal" hidden>
+      <div class="confirm-modal-backdrop" data-leave-modal-close></div>
+      <div
+        class="confirm-modal-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="leave-confirm-title"
+        aria-describedby="leave-confirm-message"
+      >
+        <h4 id="leave-confirm-title" class="confirm-modal-title">
+          Confirm Leave
+        </h4>
+        <p id="leave-confirm-message" class="confirm-modal-message">
+          Are you sure you want to leave this meeting?
+        </p>
+        <div class="confirm-modal-actions">
+          <button type="button" class="confirm-modal-btn" data-leave-cancel>
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="confirm-modal-btn danger"
+            data-leave-confirm
+          >
+            Leave
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="confirm-modal" id="participant-fast-call-modal" hidden>
+      <div class="confirm-modal-backdrop" data-fast-call-close></div>
+      <div
+        class="confirm-modal-card participant-fast-call-modal-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="participant-fast-call-title"
+      >
+        <button
+          type="button"
+          class="conference-modal-close"
+          data-fast-call-close
+          aria-label="Close dialing dialog"
+        >
+          x
+        </button>
+        <h4 id="participant-fast-call-title" class="confirm-modal-title">
+          Dialing
+        </h4>
+        <form id="participant-fast-call-form" class="participant-fast-call-form">
+          <div class="participant-fast-call-body">
+            <label class="participant-fast-call-field participant-fast-call-field-wide">
+              <span>Number</span>
+              <div class="participant-fast-call-number-row">
+                <select
+                  name="type"
+                  class="participant-fast-call-type"
+                  aria-label="Call type"
+                >
+                  <option value="SIP">SIP</option>
+                  <option value="H323">H.323</option>
+                </select>
+                <input
+                  name="number"
+                  type="text"
+                  maxlength="120"
+                  autocomplete="off"
+                  placeholder="Enter a number, IP address or URI"
+                  aria-label="Number to call"
+                  required
+                />
+                <button
+                  type="submit"
+                  class="participant-fast-call-submit"
+                  title="Call"
+                  aria-label="Call"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                      d="M6.54 5a1.5 1.5 0 0 1 1.4.95l1.2 3a1.5 1.5 0 0 1-.35 1.59l-1.06 1.06a14.1 14.1 0 0 0 4.67 4.67l1.06-1.06a1.5 1.5 0 0 1 1.59-.35l3 1.2A1.5 1.5 0 0 1 19 17.46V20a1 1 0 0 1-1 1C10.82 21 3 13.18 3 4a1 1 0 0 1 1-1z"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </label>
+            <label class="participant-fast-call-field participant-fast-call-field-wide">
+              <span>Resolution</span>
+              <select name="resolution" aria-label="Resolution"></select>
+            </label>
+            <div class="participant-fast-call-grid">
+              <label class="participant-fast-call-field">
+                <span>Bandwidth</span>
+                <select name="speed" aria-label="Bandwidth"></select>
+              </label>
+              <label class="participant-fast-call-field">
+                <span>FPS</span>
+                <select name="fps" aria-label="FPS"></select>
+              </label>
+            </div>
+          </div>
+          <div class="confirm-modal-actions participant-fast-call-actions">
+            <button type="button" class="confirm-modal-btn" data-fast-call-close>
+              Close
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="confirm-modal" id="address-participant-modal" hidden>
+      <div class="confirm-modal-backdrop" data-address-modal-close></div>
+      <div
+        class="confirm-modal-card address-participant-modal-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="address-participant-title"
+      >
+        <h4 id="address-participant-title" class="confirm-modal-title">
+          Add Participant
+        </h4>
+        <div class="address-modal-target">
+          Target Group:
+          <span id="address-modal-group-name">-</span>
+        </div>
+        <form id="address-participant-form" class="address-participant-form">
+          <label class="address-field">
+            <span>Name</span>
+            <input
+              id="ab-participant-name"
+              name="name"
+              type="text"
+              required
+              maxlength="80"
+              autocomplete="off"
+            />
+          </label>
+          <label class="address-field">
+            <span>Dialing Direction</span>
+            <select name="dialing_direction">
+              <option>Dial out</option>
+              <option>Dial in</option>
+            </select>
+          </label>
+          <label class="address-field">
+            <span>Type</span>
+            <select name="endpoint_type">
+              <option>H.323</option>
+              <option>SIP</option>
+            </select>
+          </label>
+          <label class="address-field address-field-wide">
+            <span>IP Address</span>
+            <input name="ip_address" type="text" maxlength="64" />
+          </label>
+          <div class="address-field-combo">
+            <label class="address-field">
+              <span>Alias Name</span>
+              <input name="alias_name" type="text" maxlength="64" />
+            </label>
+            <label class="address-field">
+              <span>Alias Type</span>
+              <select name="alias_type">
+                <option>H.323 ID</option>
+                <option>SIP URI</option>
+                <option>E.164</option>
+              </select>
+            </label>
+          </div>
+          <label class="address-field address-field-wide">
+            <span>Website IP Address</span>
+            <input name="website_ip" type="text" maxlength="64" />
+          </label>
+          <label class="address-check-field">
+            <input type="checkbox" name="audio_only" />
+            <span>Audio Only</span>
+          </label>
+          <label class="address-field address-field-wide">
+            <span>Extension/Identifier String</span>
+            <input name="extension" type="text" maxlength="64" />
+          </label>
+          <div class="confirm-modal-actions">
+            <button type="button" class="confirm-modal-btn" data-address-cancel>
+              Cancel
+            </button>
+            <button type="submit" class="confirm-modal-btn danger">OK</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="confirm-modal" id="address-group-modal" hidden>
+      <div class="confirm-modal-backdrop" data-address-group-modal-close></div>
+      <div
+        class="confirm-modal-card address-group-modal-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="address-group-title"
+      >
+        <h4 id="address-group-title" class="confirm-modal-title">Add Group</h4>
+        <form id="address-group-form" class="address-group-form">
+          <div class="address-modal-target">
+            Parent Group:
+            <span id="address-group-parent-name">-</span>
+          </div>
+          <label class="address-field address-field-wide">
+            <span>Group Name</span>
+            <input
+              id="ab-group-name"
+              name="group_name"
+              type="text"
+              required
+              maxlength="80"
+              autocomplete="off"
+            />
+          </label>
+          <div class="confirm-modal-actions">
+            <button
+              type="button"
+              class="confirm-modal-btn"
+              data-address-group-cancel
+            >
+              Cancel
+            </button>
+            <button type="submit" class="confirm-modal-btn danger">OK</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+    <script src="{% static 'js/api-axios.js' %}?v=20260318-1"></script>
+    <script src="{% static 'js/layout-manager.js' %}?v=20260323-18"></script>
+    <script src="{% static 'js/popup-manager.js' %}?v=20260319-1"></script>
+    <script src="{% static 'js/address-book-manager.js' %}?v=20260323-7"></script>
+    <script src="{% static 'js/conference/conference-manager.js' %}?v=20260319-3"></script>
+    <script src="{% static 'js/participant/participant-manager.js' %}?v=20260323-16"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.18/dist/hls.min.js"></script>
+    <script src="{% static 'js/stage-stream-manager.js' %}?v=20260323-24"></script>
+    <script src="{% static 'js/participant/participant-actions.js' %}?v=20260324-1"></script>
+    <script src="{% static 'js/participant/participant-context-menu.js' %}?v=20260321-1"></script>
+    <script src="{% static 'js/dashboard/dashboard-bootstrap.js' %}?v=20260323-3"></script>
+  </body>
 </html>

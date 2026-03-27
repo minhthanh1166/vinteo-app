@@ -1,4 +1,4 @@
-"""
+﻿"""
 URL configuration for vinteo_app project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
@@ -17,9 +17,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from . import admin as admin_customize
-from .views import dashboard
+from .views import dashboard, vinteo_proxy
 
 urlpatterns = [
     path('', dashboard, name='dashboard'),
     path('admin/', admin.site.urls),
+    path('api/vinteo/<path:endpoint>', vinteo_proxy, name='vinteo-proxy'),
 ]
