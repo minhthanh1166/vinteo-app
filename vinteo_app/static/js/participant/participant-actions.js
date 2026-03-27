@@ -691,7 +691,7 @@
           });
         }
 
-        async function requestDeleteParticipant(
+        async function requestDeleteParticipantStrict(
           conferenceNumber,
           participantNumber,
         ) {
@@ -713,19 +713,36 @@
           const conferencePath = encodeURIComponent(normalizedConference);
           const participantPath = encodeURIComponent(normalizedParticipant);
 
+          await apiClient.delete(
+            "/api/v1/participant/" +
+              conferencePath +
+              "/" +
+              participantPath,
+          );
+        }
+
+        async function requestDeleteParticipant(
+          conferenceNumber,
+          participantNumber,
+        ) {
+          const normalizedConference = String(conferenceNumber || "").trim();
+          const normalizedParticipant = String(participantNumber || "").trim();
+
           try {
-            await apiClient.delete(
-              "/api/v1/participant/" +
-                conferencePath +
-                "/" +
-                participantPath,
+            await requestDeleteParticipantStrict(
+              normalizedConference,
+              normalizedParticipant,
             );
             return;
           } catch (deleteError) {
+            const apiClient = getVinteoApiClient();
+            if (!apiClient) {
+              throw new Error("API client is not ready.");
+            }
             try {
               await apiClient.post("/api/v1/disconnect", {
-                conference: normalizedConference,
-                participants: [normalizedParticipant],
+                conference: String(normalizedConference || "").trim(),
+                participants: [String(normalizedParticipant || "").trim()],
               });
             } catch (_disconnectError) {
               throw deleteError;
@@ -844,6 +861,57 @@
               }),
             ),
           );
+        }
+
+        function buildParticipantDeleteCandidates(participantIdentifiers) {
+          const queue = Array.isArray(participantIdentifiers)
+            ? participantIdentifiers
+            : [];
+          const candidates = new Set();
+
+          function push(value) {
+            const normalized = String(value || "").trim();
+            if (!normalized) {
+              return;
+            }
+            candidates.add(normalized);
+          }
+
+          queue.forEach(function (identifier) {
+            const normalized = String(identifier || "").trim();
+            if (!normalized) {
+              return;
+            }
+
+            push(normalized);
+
+            try {
+              const decoded = decodeURIComponent(normalized);
+              push(decoded);
+            } catch (_error) {
+              // Keep raw identifier.
+            }
+
+            const firstSlashIndex = normalized.indexOf("/");
+            if (firstSlashIndex > 0) {
+              push(
+                normalized.slice(0, firstSlashIndex) +
+                  "|" +
+                  normalized.slice(firstSlashIndex + 1),
+              );
+            }
+
+            const firstPipeIndex = normalized.indexOf("|");
+            if (firstPipeIndex > 0) {
+              push(
+                normalized.slice(0, firstPipeIndex) +
+                  "/" +
+                  normalized.slice(firstPipeIndex + 1),
+              );
+            }
+          });
+
+          return Array.from(candidates);
         }
 
         function removeParticipantVisualsByName(participantName) {
@@ -998,7 +1066,7 @@
               " from this meeting?",
           );
           if (accepted) {
-            void executeKickParticipantRow(currentRow);
+            void executeDeleteParticipantRow(currentRow);
           }
         }
 
@@ -1066,6 +1134,79 @@
             return false;
           } finally {
             currentRow.dataset.callBusy = "0";
+          }
+        }
+
+        async function executeDeleteParticipantRow(row) {
+          if (!row || row.classList.contains("participant-empty-row")) {
+            return false;
+          }
+
+          const participantNumber = getParticipantNumberFromRow(row);
+          const currentRow =
+            findRenderedParticipantRowByNumber(participantNumber) || row;
+
+          if (
+            !currentRow ||
+            currentRow.classList.contains("participant-empty-row")
+          ) {
+            return false;
+          }
+
+          if (currentRow.dataset.deleteBusy === "1") {
+            return false;
+          }
+
+          const conferenceNumber = getActiveConferenceNumber();
+          const participantName = getParticipantDisplayNameFromRow(currentRow);
+          const actionButton = currentRow.querySelector(".kick-btn");
+          const participantIdentifiers = buildParticipantDeleteCandidates(
+            collectParticipantIdentifiers(currentRow),
+          );
+
+          currentRow.dataset.deleteBusy = "1";
+          if (actionButton) {
+            actionButton.disabled = true;
+          }
+
+          try {
+            let lastDeleteError = null;
+            let deleted = false;
+
+            for (
+              let index = 0;
+              index < participantIdentifiers.length;
+              index += 1
+            ) {
+              const candidate = participantIdentifiers[index];
+              try {
+                await requestDeleteParticipantStrict(conferenceNumber, candidate);
+                deleted = true;
+                break;
+              } catch (error) {
+                lastDeleteError = error;
+              }
+            }
+
+            if (!deleted) {
+              throw lastDeleteError || new Error("Participant does not exist.");
+            }
+
+            currentRow.remove();
+            removeParticipantVisualsByName(participantName);
+            syncMuteAllButtonState();
+            dispatchParticipantListRefresh();
+            return true;
+          } catch (error) {
+            window.alert(
+              "Cannot delete participant: " + extractRequestErrorMessage(error),
+            );
+            return false;
+          } finally {
+            currentRow.dataset.deleteBusy = "0";
+            if (actionButton) {
+              actionButton.disabled = false;
+            }
           }
         }
 
