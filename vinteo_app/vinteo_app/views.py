@@ -1,8 +1,14 @@
-from pathlib import Path
+﻿from pathlib import Path
+import json
 import re
 
 from django.conf import settings
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+
+from .api.client import VinteoClientError, vinteo_client
 
 
 def _natural_sort_key(file_name: str) -> list[tuple[int, int | str]]:
@@ -39,3 +45,46 @@ def dashboard(request):
         "layout_equal_images": _collect_layout_images("equal"),
     }
     return render(request, "dashboard.html", context)
+
+
+def _build_proxy_response(status: int, headers: dict[str, str], body: bytes) -> HttpResponse:
+    content_type = headers.get("Content-Type", "application/json")
+
+    if "application/json" in content_type.lower():
+        if not body:
+            return JsonResponse({}, status=status)
+
+        try:
+            payload = json.loads(body.decode("utf-8"))
+            return JsonResponse(payload, safe=not isinstance(payload, list), status=status)
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            return HttpResponse(body, status=status, content_type=content_type)
+
+    return HttpResponse(body, status=status, content_type=content_type)
+
+
+@csrf_exempt
+@require_http_methods(["GET", "POST", "PUT", "PATCH", "DELETE"])
+def vinteo_proxy(request, endpoint: str):
+    query = request.META.get("QUERY_STRING", "").strip()
+    upstream_endpoint = endpoint
+    if query:
+        upstream_endpoint += "?" + query
+
+    body = request.body if request.body else None
+    extra_headers: dict[str, str] = {}
+    content_type = request.META.get("CONTENT_TYPE", "").strip()
+    if content_type:
+        extra_headers["Content-Type"] = content_type
+
+    try:
+        response = vinteo_client.request(
+            method=request.method,
+            endpoint=upstream_endpoint,
+            body=body,
+            extra_headers=extra_headers,
+        )
+    except VinteoClientError as error:
+        return JsonResponse({"error": str(error)}, status=502)
+
+    return _build_proxy_response(response.status, response.headers, response.body)

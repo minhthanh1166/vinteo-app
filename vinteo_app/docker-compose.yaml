@@ -1,7 +1,4 @@
-version: "3.9"
-
 services:
-
   db:
     image: postgres:16
     container_name: vinteo_postgres
@@ -32,5 +29,23 @@ services:
     depends_on:
       - db
 
+  pgadmin:
+    image: dpage/pgadmin4:9
+    container_name: vinteo_pgadmin
+    restart: always
+    env_file:
+      - .env
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@vinteo.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-1234}
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+
 volumes:
   postgres_data:
+  pgadmin_data:
